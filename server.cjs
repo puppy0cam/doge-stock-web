@@ -344,6 +344,44 @@ async function onReceiveRequest(request, response) {
       });
       response.end();
     }
+  } else if (path.pathname === '/spai/player/all') {
+    let knex;
+    try {
+      knex = getKnexInstanceForServer(params.server);
+    } catch {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (!knex) {
+      response.writeHead(500, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+
+    try {
+      const data = await knex('player_names').select('cwid', 'ign', 'castle', 'guild_tag');
+      const RESULT = Buffer.from(JSON.stringify({
+        schemaVersion: '1.0.0',
+        data: data || [],
+      }));
+      response.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Content-Length': RESULT.byteLength,
+      });
+      response.write(RESULT);
+      response.end();
+    } catch (e) {
+      console.error(e);
+      response.writeHead(500, {
+        'Content-Length': 0,
+      });
+      response.end();
+    }
   } else {
     const sanitaryPath = normalize(path.pathname).replace(pathSanitizer, '');
     let filePathname = join(currentConfig.webserverHomeDirectory, sanitaryPath);
