@@ -173,16 +173,21 @@ function mapValue(value) {
 /** @param {"eucw"|"ru"} server */
 export async function getAllGuilds(server) {
   const now = Date.now();
-  if (now < getAllGuilds.cache.expires) {
-    return getAllGuilds.cache.data.map(getAllGuilds.mapValue);
+  if (getAllGuilds.cache.has(server)) {
+    const cache = getAllGuilds.cache.get(server);
+    if (now < cache.expires) {
+      return cache.data.map(getAllGuilds.mapValue);
+    }
   }
   /** @type {{schemaVersion:string;data:{tag:string;castle:string;}[];}} */
   const result = await sendRequest(`/spai/guild/all?server=${server}`);
   if (result.schemaVersion !== '1.0.0') {
     throw new Error('Schema is out of date');
   }
-  getAllGuilds.cache.expires = Date.now() + 300000;
-  getAllGuilds.cache.data = result.data;
+  getAllGuilds.cache.set(server, {
+    data: result.data,
+    expires: Date.now() + 300000,
+  });
   return result.data.map(getAllGuilds.mapValue);
 }
 getAllGuilds.mapValue =
@@ -193,24 +198,26 @@ function mapValue(value) {
     castle: value.castle,
   };
 };
-getAllGuilds.cache = {
-  expires: 0,
-  /** @type {{tag:string;castle:string;}[]} */
-  data: [],
-};
+/** @type {Map<string, {expires:number;data:{tag:string;castle:string;}[]}} */
+getAllGuilds.cache = new Map();
 /** @param {"eucw"|"ru"} server */
 export async function getAllPlayers(server) {
   const now = Date.now();
-  if (now < getAllPlayers.cache.expires) {
-    return getAllPlayers.cache.data.map(getAllPlayers.mapValue);
+  if (getAllPlayers.cache.has(server)) {
+    const cache = getAllPlayers.cache.get(server);
+    if (now < cache.expires) {
+      return cache.data.map(getAllPlayers.mapValue);
+    }
   }
   /** @type {{schemaVersion:string;data:{cwid:string;ign:string;castle:string;guild_tag:string|null;}[];}} */
   const result = await sendRequest(`/spai/player/all?server=${server}`);
   if (result.schemaVersion !== '1.0.0') {
     throw new Error('Schema is out of date');
   }
-  getAllPlayers.cache.data = result.data;
-  getAllPlayers.cache.expires = Date.now() + 300000;
+  getAllPlayers.cache.set(server, {
+    data: result.data,
+    expires: Date.now() + 300000,
+  });
   return result.data.map(getAllPlayers.mapValue);
 }
 getAllPlayers.mapValue =
@@ -223,8 +230,5 @@ function mapValue(value) {
     guild_tag: value.guild_tag,
   };
 };
-getAllPlayers.cache = {
-  expires: 0,
-  /** @type {{cwid:string;ign:string;castle:string;guild_tag:string|null;}[]} */
-  data: [],
-};
+/** @type {Map<string, {expires:number;data:{cwid:string;ign:string;castle:string;guild_tag:string|null;}[]}} */
+getAllPlayers.cache = new Map();
