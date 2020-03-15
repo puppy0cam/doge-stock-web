@@ -84,6 +84,8 @@ function getKnexInstanceForServer(server) {
 }
 /** @type {WeakMap<import('knex'), {expires:number;data:Buffer;}} */
 const spaiPlayerAllListCache = new WeakMap();
+/** @type {WeakMap<import('knex'), {expires:number;data:Buffer;}} */
+const spaiGuildAllListCache = new WeakMap();
 async function onReceiveRequest(request, response) {
   'use strict';
 
@@ -328,17 +330,34 @@ async function onReceiveRequest(request, response) {
     }
 
     try {
-      const data = await knex('spai_current_guilds').select('tag', 'castle');
-      const RESULT = Buffer.from(JSON.stringify({
-        schemaVersion: '1.0.0',
-        data: data || [],
-      }));
-      response.writeHead(200, {
-        'Content-Type': 'application/json',
-        'Content-Length': RESULT.byteLength,
-      });
-      response.write(RESULT);
-      response.end();
+      const now = Math.floor(Date.now() / 1000);
+      const cache = spaiGuildAllListCache.get(knex);
+      if (cache && cache.expires > now) {
+        response.writeHead(200, {
+          'Content-Type': 'application/json',
+          'Content-Length': cache.data.byteLength,
+          'Cache-Control': `Public, Max-Age=${(now - cache.expires) || 1}`,
+        });
+        response.write(cache.data);
+        response.end();
+      } else {
+        const data = await knex('spai_current_guilds').select('tag', 'castle');
+        const RESULT = Buffer.from(JSON.stringify({
+          schemaVersion: '1.0.0',
+          data: data || [],
+        }));
+        spaiGuildAllListCache.set(knex, {
+          data: RESULT,
+          expires: now + 30,
+        });
+        response.writeHead(200, {
+          'Content-Type': 'application/json',
+          'Content-Length': RESULT.byteLength,
+          'Cache-Control': 'Public, Max-Age=30',
+        });
+        response.write(RESULT);
+        response.end();
+      }
     } catch (e) {
       console.error(e);
       response.writeHead(500, {
