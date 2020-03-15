@@ -3,7 +3,14 @@
   <q-table :data="duels" :columns="columns" flat :filter="filter">
     <template v-slot:top>
       <q-space />
-      <q-input borderless dense debounce="300" color="primary" v-model="filter" label="Search">
+      <q-input
+      borderless
+      dense
+      debounce="300"
+      color="primary"
+      v-model="filter"
+      :label="$t('duels_view_search_bar_label')"
+      >
         <template v-slot:append>
           <q-icon name="search" />
         </template>
@@ -15,10 +22,7 @@
 
 <script>
 import { duels } from '../contentCache';
-/** @param {{id:string;name:string;tag?:string;castle:string;level:number;hp:number;}} player */
-function formatPlayer(player) {
-  return `${player.castle}${player.tag ? `[${player.tag}]` : ''}${player.name}`;
-}
+
 export default {
   name: 'PageDuelsView',
   data() {
@@ -28,22 +32,78 @@ export default {
       columns: [
         {
           name: 'server',
-          label: 'Server',
+          label: this.$t('duels_view_col_server_label'),
           field: 'server',
-          required: true,
-          align: 'left',
         },
         {
-          name: 'winner',
-          label: 'Winner',
-          field: (row) => row.data.winner,
-          format: formatPlayer,
+          name: 'isChallenge',
+          label: this.$t('duels_view_col_isChallenge_label'),
+          field: (row) => row.data.isChallenge,
         },
         {
-          name: 'loser',
-          label: 'Loser',
-          field: (row) => row.data.loser,
-          format: formatPlayer,
+          name: 'isGuildDuel',
+          label: this.$t('duels_view_col_isGuildDuel_label'),
+          field: (row) => row.data.isGuildDuel,
+        },
+        {
+          name: 'winnerId',
+          label: this.$t('duels_view_col_winnerId_label'),
+          field: (row) => row.data.winner.id,
+        },
+        {
+          name: 'winnerName',
+          label: this.$t('duels_view_col_winnerName_label'),
+          field: (row) => row.data.winner.name,
+        },
+        {
+          name: 'winnerTag',
+          label: this.$t('duels_view_col_winnerTag_label'),
+          field: (row) => row.data.winner.tag,
+        },
+        {
+          name: 'winnerCastle',
+          label: this.$t('duels_view_col_winnerCastle_label'),
+          field: (row) => row.data.winner.castle,
+        },
+        {
+          name: 'winnerLevel',
+          label: this.$t('duels_view_col_winnerLevel_label'),
+          field: (row) => row.data.winner.level,
+        },
+        {
+          name: 'winnerHp',
+          label: this.$t('duels_view_col_winnerHp_label'),
+          field: (row) => row.data.winner.hp,
+        },
+        {
+          name: 'loserId',
+          label: this.$t('duels_view_col_loserId_label'),
+          field: (row) => row.data.loser.id,
+        },
+        {
+          name: 'loserName',
+          label: this.$t('duels_view_col_loserName_label'),
+          field: (row) => row.data.loser.name,
+        },
+        {
+          name: 'loserTag',
+          label: this.$t('duels_view_col_loserTag_label'),
+          field: (row) => row.data.loser.tag,
+        },
+        {
+          name: 'loserCastle',
+          label: this.$t('duels_view_col_loserCastle_label'),
+          field: (row) => row.data.loser.castle,
+        },
+        {
+          name: 'loserLevel',
+          label: this.$t('duels_view_col_loserLevel_label'),
+          field: (row) => row.data.loser.level,
+        },
+        {
+          name: 'loserHp',
+          label: this.$t('duels_view_col_loserHp_label'),
+          field: (row) => row.data.loser.hp,
         },
       ],
     };

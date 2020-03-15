@@ -10,7 +10,13 @@
   >
     <template v-slot:top>
       <q-space />
-      <q-input borderless dense debounce="300" color="primary" v-model="filter" label="Search">
+      <q-input
+      borderless
+      dense
+      debounce="300"
+      color="primary"
+      v-model="filter"
+      :label="$t('guild_members_search_box_label')">
         <template v-slot:append>
           <q-icon name="search" />
         </template>
@@ -31,21 +37,21 @@ export default {
       columns: [
         {
           name: 'cwid',
-          label: 'Id',
+          label: this.$t('guild_members_col_cwid_label'),
           field: 'cwid',
           required: true,
           align: 'left',
         },
         {
           name: 'ign',
-          label: 'Name',
+          label: this.$t('guild_members_col_ign_label'),
           field: 'ign',
           required: true,
           align: 'left',
         },
         {
           name: 'castle',
-          label: 'Castle',
+          label: this.$t('guild_members_col_castle_label'),
           field: 'castle',
           required: false,
           align: 'left',

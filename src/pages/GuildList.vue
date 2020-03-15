@@ -9,7 +9,10 @@
   @row-click="clickGuildRow"
   >
     <template v-slot:top>
-      <q-btn-dropdown color="primary" :label="serverSelected">
+      <q-btn-dropdown
+      color="primary"
+      :label="$t('guild_list_option_serverSelected_value_' + serverSelected)"
+      >
         <q-list>
           <q-item
           clickable
@@ -19,13 +22,22 @@
           @click="selectServer(key)"
           >
             <q-item-section>
-              <q-item-label>{{ key }}</q-item-label>
+              <q-item-label>
+                {{ $t('guild_list_option_serverSelected_dropdown_' + key) }}
+              </q-item-label>
             </q-item-section>
           </q-item>
         </q-list>
       </q-btn-dropdown>
       <q-space />
-      <q-input borderless dense debounce="300" color="primary" v-model="filter" label="Search">
+      <q-input
+      borderless
+      dense
+      debounce="300"
+      color="primary"
+      v-model="filter"
+      :label="$t('guild_list_search_box_label')"
+      >
         <template v-slot:append>
           <q-icon name="search" />
         </template>
@@ -46,7 +58,7 @@ export default {
       columns: [
         {
           name: 'tag',
-          label: 'Guild tag',
+          label: this.$t('guild_list_col_tag_label'),
           field: 'tag',
           required: true,
           align: 'left',
@@ -55,7 +67,7 @@ export default {
         },
         {
           name: 'castle',
-          label: 'Castle',
+          label: this.$t('guild_list_col_castle_label'),
           field: 'castle',
           required: true,
           align: 'left',

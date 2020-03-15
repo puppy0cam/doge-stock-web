@@ -9,7 +9,10 @@
   @row-click="clickPlayerRow"
   >
     <template v-slot:top>
-      <q-btn-dropdown color="primary" :label="serverSelected">
+      <q-btn-dropdown
+      color="primary"
+      :label="$t('player_list_option_serverSelected_value_' + serverSelected)"
+      >
         <q-list>
           <q-item
           clickable
@@ -19,13 +22,22 @@
           @click="selectServer(key)"
           >
             <q-item-section>
-              <q-item-label>{{ key }}</q-item-label>
+              <q-item-label>
+                {{ $t('player_list_option_serverSelected_dropdown_' + key) }}
+              </q-item-label>
             </q-item-section>
           </q-item>
         </q-list>
       </q-btn-dropdown>
       <q-space />
-      <q-input borderless dense debounce="300" color="primary" v-model="filter" label="Search">
+      <q-input
+      borderless
+      dense
+      debounce="300"
+      color="primary"
+      v-model="filter"
+      :label="$t('player_list_search_box_label')"
+      >
         <template v-slot:append>
           <q-icon name="search" />
         </template>
@@ -46,7 +58,7 @@ export default {
       columns: [
         {
           name: 'cwid',
-          label: 'Id',
+          label: this.$t('player_list_col_cwid_label'),
           field: 'cwid',
           required: true,
           align: 'left',
@@ -55,7 +67,7 @@ export default {
         },
         {
           name: 'castle',
-          label: 'Castle',
+          label: this.$t('player_list_col_castle_label'),
           field: 'castle',
           required: true,
           align: 'left',
@@ -64,7 +76,7 @@ export default {
         },
         {
           name: 'ign',
-          label: 'Name',
+          label: this.$t('player_list_col_ign_label'),
           field: 'ign',
           required: true,
           align: 'left',
@@ -73,7 +85,7 @@ export default {
         },
         {
           name: 'guild_tag',
-          label: 'Guild',
+          label: this.$t('player_list_col_guild_tag_label'),
           field: 'guild_tag',
           required: false,
           align: 'left',
@@ -92,10 +104,10 @@ export default {
           },
           format: (value) => {
             if (value === '???') {
-              return '';
+              return this.$t('player_list_col_guild_tag_value_unknown');
             }
             if (value == null || value === '') {
-              return 'None';
+              return this.$t('player_list_col_guild_tag_value_empty');
             }
             return value;
           },

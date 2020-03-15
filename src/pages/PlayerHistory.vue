@@ -3,7 +3,13 @@
   <q-table :data="history" :columns="columns" flat :filter="filter" :loading="loading">
     <template v-slot:top>
       <q-space />
-      <q-input borderless dense debounce="300" color="primary" v-model="filter" label="Search">
+      <q-input
+      borderless
+      dense debounce="300"
+      color="primary"
+      v-model="filter"
+      :label="$t('player_history_search_box_label')"
+      >
         <template v-slot:append>
           <q-icon name="search" />
         </template>
@@ -25,21 +31,21 @@ export default {
       columns: [
         {
           name: 'name',
-          label: 'Name',
+          label: this.$t('player_history_col_name_label'),
           field: 'name',
           required: true,
           align: 'left',
         },
         {
           name: 'castle',
-          label: 'Castle',
+          label: this.$t('player_history_col_castle_label'),
           field: 'castle',
           required: true,
           align: 'left',
         },
         {
           name: 'guild_tag',
-          label: 'Guild',
+          label: this.$t('player_history_col_guild_tag_label'),
           field: 'guild_tag',
           required: false,
           align: 'left',
@@ -55,7 +61,7 @@ export default {
         },
         {
           name: 'timestamp',
-          label: 'Date',
+          label: this.$t('player_history_col_timestamp_label'),
           field: 'timestamp',
           required: true,
           align: 'left',

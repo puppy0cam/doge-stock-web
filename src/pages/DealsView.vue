@@ -3,7 +3,12 @@
   <q-table :data="deals" :columns="columns" flat :filter="filter">
     <template v-slot:top>
       <q-space />
-      <q-input borderless dense debounce="300" color="primary" v-model="filter" label="Search">
+      <q-input borderless
+      dense debounce="300"
+      color="primary"
+      v-model="filter"
+      :label="$t('deals_view_search_bar_label')"
+      >
         <template v-slot:append>
           <q-icon name="search" />
         </template>
@@ -25,54 +30,54 @@ export default {
       columns: [
         {
           name: 'server',
-          label: 'Server',
+          label: this.$t('deals_view_col_server_label'),
           field: 'server',
           required: true,
           align: 'left',
         },
         {
           name: 'sellerId',
-          label: 'Seller ID',
+          label: this.$t('deals_view_col_sellerId_label'),
           field: (row) => row.data.sellerId,
         },
         {
           name: 'sellerCastle',
-          label: 'Seller Castle',
+          label: this.$t('deals_view_col_sellerCastle_label'),
           field: (row) => row.data.sellerCastle,
         },
         {
           name: 'sellerName',
-          label: 'Seller Name',
+          label: this.$t('deals_view_col_sellerName_label'),
           field: (row) => row.data.sellerName,
         },
         {
           name: 'buyerId',
-          label: 'Buyer ID',
+          label: this.$t('deals_view_col_buyerId_label'),
           field: (row) => row.data.buyerId,
         },
         {
           name: 'buyerCastle',
-          label: 'Buyer Castle',
+          label: this.$t('deals_view_col_buyerCastle_label'),
           field: (row) => row.data.buyercastle,
         },
         {
           name: 'buyerName',
-          label: 'Buyer Name',
+          label: this.$t('deals_view_col_buyerName_label'),
           field: (row) => row.data.buyerName,
         },
         {
           name: 'item',
-          label: 'Item',
+          label: this.$t('deals_view_col_item_label'),
           field: (row) => row.data.item,
         },
         {
           name: 'qty',
-          label: 'Quantity',
+          label: this.$t('deals_view_col_qty_label'),
           field: (row) => row.data.qty,
         },
         {
           name: 'price',
-          label: 'Price',
+          label: this.$t('deals_view_col_price_label'),
           field: (row) => row.data.price,
         },
       ],
