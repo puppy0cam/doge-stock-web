@@ -170,3 +170,19 @@ function mapValue(value) {
     castle: value.castle,
   };
 };
+export async function getAllGuilds(server) {
+/** @type {{schemaVersion:string;data:{tag:string;castle:string;}[];}} */
+  const result = await sendRequest(`/spai/guild/all?server=${server}`);
+  if (result.schemaVersion !== '1.0.0') {
+    throw new Error('Schema is out of date');
+  }
+  return result.data.map(getAllGuilds.mapValue);
+}
+getAllGuilds.mapValue =
+/** @param {{tag:string;castle:string:}} value */
+function mapValue(value) {
+  return {
+    tag: value.tag,
+    castle: value.castle,
+  };
+};

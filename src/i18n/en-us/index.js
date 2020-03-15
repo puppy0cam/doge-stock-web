@@ -49,6 +49,8 @@ export default {
   nav_caption_deals: 'Watch the exchange deals happen live!',
   nav_title_spai: 'Spai',
   nav_caption_spai: 'Learn about the name, castle, and guild changes happening in the Chat Wars kingdoms',
+  nav_title_guilds: 'Guilds',
+  nav_caption_guilds: 'View a list of all the guilds known, and view further informationa about them.',
   game_name: 'Chat Wars',
   navigation_description: 'Services',
   app_name: 'Doge Stock',

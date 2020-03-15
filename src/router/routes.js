@@ -8,6 +8,7 @@ const routes = [
       { path: 'duels', component: () => import('pages/DuelsView.vue') },
       { path: 'offers', component: () => import('pages/OffersView.vue') },
       { path: 'deals', component: () => import('pages/DealsView.vue') },
+      { path: 'guilds', component: () => import('pages/GuildList.vue') },
     ],
   },
 ];

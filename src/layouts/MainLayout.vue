@@ -80,6 +80,11 @@ export default {
           destination: '/deals',
           icon: 'attach_money',
         },
+        {
+          section: 'guilds',
+          destination: '/guilds',
+          icon: 'remove_red_eye',
+        },
       ],
     };
   },
