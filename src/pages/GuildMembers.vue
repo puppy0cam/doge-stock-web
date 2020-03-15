@@ -1,6 +1,13 @@
 <template>
 <q-page>
-  <q-table :data="members" :columns="columns" flat :filter="filter" :loading="loading">
+  <q-table
+  :data="members"
+  :columns="columns"
+  flat
+  :filter="filter"
+  :loading="loading"
+  @row-click="onClickRow"
+  >
     <template v-slot:top>
       <q-space />
       <q-input borderless dense debounce="300" color="primary" v-model="filter" label="Search">
@@ -66,6 +73,11 @@ export default {
     tag: {
       type: String,
       required: true,
+    },
+  },
+  methods: {
+    onClickRow(event, row) {
+      this.$router.push(`/playerhistory/${this.server}/${row.cwid}`);
     },
   },
 };

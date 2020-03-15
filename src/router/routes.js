@@ -10,6 +10,7 @@ const routes = [
       { path: 'deals', component: () => import('pages/DealsView.vue') },
       { path: 'guilds', component: () => import('pages/GuildList.vue') },
       { path: 'guildmembers/:server/:tag', component: () => import('pages/GuildMembers.vue'), props: true },
+      { path: 'playerhistory/:server/:id', component: () => import('pages/PlayerHistory.vue'), props: true },
     ],
   },
 ];
