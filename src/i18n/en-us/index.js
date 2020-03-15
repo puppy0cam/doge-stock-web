@@ -8,18 +8,19 @@ Check back later for updates!
 
 I have exposed some API endpoints for Doge Stock in order to run this website.
 While you are welcome to use the website,
-please understand that I log the IP address of all requests,
-and abuse could lead to your IP being blocked.
+Other developers are also welcome to use this service but,
+Don't abuse it or take things too far or I'll start blocking your requests.
+Please take note that the webserver is intentionally placed away from the database, and queries may not be fulfilled at such a high rate.
+Caching is planned for some methods, but not yet implemented so take care in the early days.
 
-/spai/player/history?server&id
+ - /spai/player/history?server&id
+ - /spai/player/find?server&name
+ - /spai/guild?server&tag
+ - /spai/guild/members?server&tag
+ - /spai/guild/all?server
+ - /spai/player/all?server
 
-/spai/player/find?server&name
-
-/spai/guild?server&tag
-
-/spai/guild/members?server&tag
-
-The \`server\` parameter expects that you specify "eucw" or "ru" (lowercase)
+The \`server\` parameter expects that you specify "eucw" or "ru". Some aliases are accepted, but not guarunteed.
 Other fields depend on the circumstances, and I grant no guaruntee of it being successful.
 
 I also have websockets available running on /{server}/{queue} which mirror the queues available in the official Chat Wars API.
@@ -35,6 +36,9 @@ I also have websockets available running on /{server}/{queue} which mirror the q
  - /ru/sex_digest
  - /ru/au_digest
  - /ru/yellow_pages
+
+If you are a regular user and would like to translate the site into your language,
+you are welcome to submit translations to my feedback or updates channel discussion group.
 `;
 
 export default {
