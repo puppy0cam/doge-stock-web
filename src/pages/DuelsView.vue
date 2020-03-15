@@ -39,11 +39,13 @@ export default {
           name: 'isChallenge',
           label: this.$t('duels_view_col_isChallenge_label'),
           field: (row) => row.data.isChallenge,
+          format: (value) => this.$t(`duels_view_col_isChallenge_value_${value}`),
         },
         {
           name: 'isGuildDuel',
           label: this.$t('duels_view_col_isGuildDuel_label'),
           field: (row) => row.data.isGuildDuel,
+          format: (value) => this.$t(`duels_view_col_isGuildDuel_value_${value}`),
         },
         {
           name: 'winnerId',
@@ -59,6 +61,12 @@ export default {
           name: 'winnerTag',
           label: this.$t('duels_view_col_winnerTag_label'),
           field: (row) => row.data.winner.tag,
+          format: (value) => {
+            if (value == null || value === '') {
+              return this.$t('duels_view_col_winnerTag_value_empty');
+            }
+            return value;
+          },
         },
         {
           name: 'winnerCastle',
@@ -89,6 +97,12 @@ export default {
           name: 'loserTag',
           label: this.$t('duels_view_col_loserTag_label'),
           field: (row) => row.data.loser.tag,
+          format: (value) => {
+            if (value == null || value === '') {
+              return this.$t('duels_view_col_loserTag_value_empty');
+            }
+            return value;
+          },
         },
         {
           name: 'loserCastle',
