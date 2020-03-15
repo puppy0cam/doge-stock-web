@@ -1,12 +1,14 @@
 <template>
 <q-page>
   <q-table :data="members" :columns="columns" flat :filter="filter" :loading="loading">
-    <q-space />
-    <q-input borderless dense debounce="300" color="primary" v-model="filter" label="Search">
-      <template v-slot:append>
-        <q-icon name="search" />
-      </template>
-    </q-input>
+    <template v-slot:top>
+      <q-space />
+      <q-input borderless dense debounce="300" color="primary" v-model="filter" label="Search">
+        <template v-slot:append>
+          <q-icon name="search" />
+        </template>
+      </q-input>
+    </template>
   </q-table>
 </q-page>
 </template>
