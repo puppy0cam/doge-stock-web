@@ -348,12 +348,12 @@ async function onReceiveRequest(request, response) {
         }));
         spaiGuildAllListCache.set(knex, {
           data: RESULT,
-          expires: now + 30,
+          expires: now + 300,
         });
         response.writeHead(200, {
           'Content-Type': 'application/json',
           'Content-Length': RESULT.byteLength,
-          'Cache-Control': 'Public, Max-Age=30',
+          'Cache-Control': 'Public, Max-Age=300',
         });
         response.write(RESULT);
         response.end();
@@ -403,12 +403,12 @@ async function onReceiveRequest(request, response) {
         }));
         spaiPlayerAllListCache.set(knex, {
           data: RESULT,
-          expires: now + 30,
+          expires: now + 300,
         });
         response.writeHead(200, {
           'Content-Type': 'application/json',
           'Content-Length': RESULT.byteLength,
-          'Cache-Control': 'Public, Max-Age=30',
+          'Cache-Control': 'Public, Max-Age=300',
         });
         response.write(RESULT);
         response.end();
@@ -436,7 +436,7 @@ async function onReceiveRequest(request, response) {
         response.writeHead(200, {
           'Content-Type': mimeType[ext] || 'text/plain',
           'Content-Length': file.size,
-          'Cache-Control': 'Public, Max-Age=60',
+          'Cache-Control': 'Public, Max-Age=600',
         });
         const stream = createReadStream(filePathname, {
           autoClose: true,
