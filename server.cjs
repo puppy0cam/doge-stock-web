@@ -82,6 +82,8 @@ function getKnexInstanceForServer(server) {
   }
   throw new Error('Server not found');
 }
+/** @type {WeakMap<import('knex'), {expires:number;data:Buffer;}} */
+const spaiPlayerAllListCache = new WeakMap();
 async function onReceiveRequest(request, response) {
   'use strict';
 
@@ -364,17 +366,34 @@ async function onReceiveRequest(request, response) {
     }
 
     try {
-      const data = await knex('player_names').select('cwid', 'ign', 'castle', 'guild_tag');
-      const RESULT = Buffer.from(JSON.stringify({
-        schemaVersion: '1.0.0',
-        data: data || [],
-      }));
-      response.writeHead(200, {
-        'Content-Type': 'application/json',
-        'Content-Length': RESULT.byteLength,
-      });
-      response.write(RESULT);
-      response.end();
+      const now = Math.floor(Date.now() / 1000);
+      const cache = spaiPlayerAllListCache.get(knex);
+      if (cache && cache.expires > now) {
+        response.writeHead(200, {
+          'Content-Type': 'application/json',
+          'Content-Length': cache.data.byteLength,
+          'Cache-Control': `Public, Max-Age=${(now - cache.expires) || 1}`,
+        });
+        response.write(cache.data);
+        response.end();
+      } else {
+        const data = await knex('player_names').select('cwid', 'ign', 'castle', 'guild_tag');
+        const RESULT = Buffer.from(JSON.stringify({
+          schemaVersion: '1.0.0',
+          data: data || [],
+        }));
+        spaiPlayerAllListCache.set(knex, {
+          data: RESULT,
+          expires: now + 30,
+        });
+        response.writeHead(200, {
+          'Content-Type': 'application/json',
+          'Content-Length': RESULT.byteLength,
+          'Cache-Control': 'Public, Max-Age=30',
+        });
+        response.write(RESULT);
+        response.end();
+      }
     } catch (e) {
       console.error(e);
       response.writeHead(500, {
@@ -398,6 +417,7 @@ async function onReceiveRequest(request, response) {
         response.writeHead(200, {
           'Content-Type': mimeType[ext] || 'text/plain',
           'Content-Length': file.size,
+          'Cache-Control': 'Public, Max-Age=60',
         });
         const stream = createReadStream(filePathname, {
           autoClose: true,
