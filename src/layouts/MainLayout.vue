@@ -85,6 +85,11 @@ export default {
           destination: '/guilds',
           icon: 'remove_red_eye',
         },
+        {
+          section: 'players',
+          destination: '/players',
+          icon: 'remove_red_eye',
+        },
       ],
     };
   },

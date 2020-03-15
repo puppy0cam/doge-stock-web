@@ -51,6 +51,8 @@ export default {
   nav_caption_spai: 'Learn about the name, castle, and guild changes happening in the Chat Wars kingdoms',
   nav_title_guilds: 'Guilds',
   nav_caption_guilds: 'View a list of all the guilds known, and view further informationa about them.',
+  nav_title_players: 'Players',
+  nav_caption_players: 'View a list of all players known to Chat Wars! Please be aware that EUCW may have some stray entries from cw3 and I have no idea how they got there.',
   game_name: 'Chat Wars',
   navigation_description: 'Services',
   app_name: 'Doge Stock',

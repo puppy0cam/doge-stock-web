@@ -170,8 +170,9 @@ function mapValue(value) {
     castle: value.castle,
   };
 };
+/** @param {"eucw"|"ru"} server */
 export async function getAllGuilds(server) {
-/** @type {{schemaVersion:string;data:{tag:string;castle:string;}[];}} */
+  /** @type {{schemaVersion:string;data:{tag:string;castle:string;}[];}} */
   const result = await sendRequest(`/spai/guild/all?server=${server}`);
   if (result.schemaVersion !== '1.0.0') {
     throw new Error('Schema is out of date');
@@ -184,5 +185,24 @@ function mapValue(value) {
   return {
     tag: value.tag,
     castle: value.castle,
+  };
+};
+/** @param {"eucw"|"ru"} server */
+export async function getAllPlayers(server) {
+/** @type {{schemaVersion:string;data:{cwid:string;ign:string;castle:string;guild_tag:string|null;}[];}} */
+  const result = await sendRequest(`/spai/player/all?server=${server}`);
+  if (result.schemaVersion !== '1.0.0') {
+    throw new Error('Schema is out of date');
+  }
+  return result.data.map(getAllPlayers.mapValue);
+}
+getAllPlayers.mapValue =
+/** @param {{cwid:string;ign:string;castle:string;guild_tag:string|null;}} value */
+function mapValue(value) {
+  return {
+    cwid: value.cwid,
+    ign: value.ign,
+    castle: value.castle,
+    guild_tag: value.guild_tag,
   };
 };

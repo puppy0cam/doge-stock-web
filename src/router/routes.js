@@ -9,6 +9,7 @@ const routes = [
       { path: 'offers', component: () => import('pages/OffersView.vue') },
       { path: 'deals', component: () => import('pages/DealsView.vue') },
       { path: 'guilds', component: () => import('pages/GuildList.vue') },
+      { path: 'players', component: () => import('pages/PlayerList.vue') },
       { path: 'guildmembers/:server/:tag', component: () => import('pages/GuildMembers.vue'), props: true },
       { path: 'playerhistory/:server/:id', component: () => import('pages/PlayerHistory.vue'), props: true },
     ],
