@@ -1,6 +1,12 @@
 <template>
 <q-page>
-  <q-table :data="offers" :columns="columns" flat :filter="filter">
+  <q-table
+  :data="offers"
+  :columns="columns"
+  flat
+  :filter="filter"
+  @row-click="clickOfferRow"
+  >
     <template v-slot:top>
       <q-space />
       <q-input
@@ -9,7 +15,8 @@
       debounce="300"
       color="primary"
       v-model="filter"
-      :label="$t('offers_view_search_box_label')">
+      :label="$t('offers_view_search_box_label')"
+      >
         <template v-slot:append>
           <q-icon name="search" />
         </template>
@@ -68,6 +75,11 @@ export default {
         },
       ],
     };
+  },
+  methods: {
+    clickOfferRow(event, row) {
+      this.$router.push(`/playerhistory/${row.server}/${row.data.sellerId}`);
+    },
   },
 };
 
