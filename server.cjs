@@ -432,13 +432,6 @@ async function onReceiveRequest(request, response) {
       response.end();
       return;
     }
-    if (params.name == null) {
-      response.writeHead(400, {
-        'Content-Length': 0,
-      });
-      response.end();
-      return;
-    }
     if (!knex) {
       response.writeHead(500, {
         'Content-Length': 0,
