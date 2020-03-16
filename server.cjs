@@ -442,8 +442,8 @@ async function onReceiveRequest(request, response) {
     try {
       const data = await knex('player_names').count('*').as('count');
       const RESULT = Buffer.from(JSON.stringify({
-        schemaVersion: '1.0.0',
-        data: data || [],
+        schemaVersion: '1.0.1',
+        data: ((data || [])[0] || {})['count(*)'] || 0,
       }));
       response.writeHead(200, {
         'Content-Type': 'application/json',
