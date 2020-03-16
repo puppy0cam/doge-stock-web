@@ -33,5 +33,8 @@ jobs:
     - name: Copy server file
       run: cp server.cjs -f /home/puppy0cam/DogeStock/Web/server.cjs
       
+    - name: Copy Credentials File
+      run: cp credentials.cjs -f /home/puppy0cam/DogeStock/Web/credentials.cjs
+      
     - name: Restart server
       run: pm2 restart DogeStockWeb
