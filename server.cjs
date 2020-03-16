@@ -506,6 +506,7 @@ function onServerUpgrade(request, socket, head) {
       }
     });
   }
+
   /** @returns {Promise<void>} */
   function reloadHttpServer() {
     'use strict';
