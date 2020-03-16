@@ -28,7 +28,7 @@ jobs:
       run: quasar build
       
     - name: Copy Build Result
-      run: cp -rf  dist /home/puppy0cam/DogeStock/Web/dist
+      run: cp -rf  dist /home/puppy0cam/DogeStock/Web/
 
     - name: Copy server file
       run: cp server.cjs -f /home/puppy0cam/DogeStock/Web/server.cjs
