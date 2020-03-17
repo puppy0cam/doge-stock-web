@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 /* eslint-disable no-labels */
 /* eslint-disable no-useless-return */
 /* eslint-disable no-nested-ternary */
@@ -432,6 +433,13 @@ async function onReceiveRequest(request, response) {
       response.end();
       return;
     }
+    if (params.filter == null) {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
     if (!knex) {
       response.writeHead(500, {
         'Content-Length': 0,
@@ -440,7 +448,17 @@ async function onReceiveRequest(request, response) {
       return;
     }
     try {
-      const data = await knex('player_names').count('*').as('count');
+      let query = knex('player_names');
+      if (params.filter) {
+        query = query.where('cwid', 'LIKE', `%${params.filter}%`)
+          .orWhere('ign', 'LIKE', `%${params.filter}%`);
+        if (params.filter.length < 5) {
+          query = query.orWhere('castle', params.filter)
+            .orWhere('guild_tag', 'LIKE', `%${params.filter}%`);
+        }
+      }
+      query = query.count('*').as('count');
+      const data = await query;
       const RESULT = Buffer.from(JSON.stringify({
         schemaVersion: '1.0.1',
         data: ((data || [])[0] || {})['count(*)'] || 0,
@@ -449,6 +467,129 @@ async function onReceiveRequest(request, response) {
         'Content-Type': 'application/json',
         'Content-Length': RESULT.byteLength,
         'Cache-Control': 'Public, Max-Age=300',
+      });
+      response.write(RESULT);
+      response.end();
+    } catch (e) {
+      console.error(e);
+      response.writeHead(500, {
+        'Content-Length': 0,
+      });
+      response.end();
+    }
+  } else if (path.pathname === '/spai/player/all/smart') {
+    /** @type {import('knex')} */
+    let knex;
+    try {
+      knex = getKnexInstanceForServer(params.server);
+    } catch {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (params.startRow == null) {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (!isFinite(Number(params.startRow))) {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (params.fetchCount == null) {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (!isFinite(Number(params.fetchCount))) {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (params.filter == null) {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (params.filter.match(/[^Ёёа-яА-Я\w\d _'-]/)) {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (params.sortBy == null) {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (params.sortBy !== 'cwid' && params.sortBy !== 'castle' && params.sortBy !== 'ign' && params.sortBy !== 'guild_tag' && params.sortBy !== 'null') {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (params.direction == null) {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (params.direction !== 'asc' && params.direction !== 'desc') {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (!knex) {
+      response.writeHead(500, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    try {
+      let query = knex('player_names').select('cwid', 'ign', 'castle', 'guild_tag');
+      if (params.filter) {
+        query = query.where('cwid', 'LIKE', `%${params.filter}%`)
+          .orWhere('ign', 'LIKE', `%${params.filter}%`);
+        if (params.filter.length < 5) {
+          query = query.orWhere('castle', params.filter)
+            .orWhere('guild_tag', 'LIKE', `%${params.filter}%`);
+        }
+      }
+      if (params.sortBy !== 'null') {
+        query = query.orderBy(params.sortBy, params.direction);
+      }
+      query = query.offset(parseInt(params.startRow, 10))
+        .limit(parseInt(params.fetchCount, 10));
+      const data = await query;
+      const RESULT = Buffer.from(JSON.stringify({
+        schemaVersion: '1.0.0',
+        data: data || [],
+      }));
+      response.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Content-Length': RESULT.byteLength,
+        'Cache-Control': 'Public, Max-Age=120',
       });
       response.write(RESULT);
       response.end();

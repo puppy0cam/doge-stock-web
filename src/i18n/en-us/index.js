@@ -20,6 +20,7 @@ Caching is planned for some methods, but not yet implemented so take care in the
  - /spai/guild/all?server
  - /spai/player/all?server
  - /spai/player/count?server
+ - /spai/player/all/smart?server&startRow&fetchCount&filter&sortBy
 
 The \`server\` parameter expects that you specify "eucw" or "ru". Some aliases are accepted, but not guarunteed.
 Other fields depend on the circumstances, and I grant no guaruntee of it being successful.

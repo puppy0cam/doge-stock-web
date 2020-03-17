@@ -7,6 +7,8 @@
   flat
   :filter="filter"
   @row-click="clickPlayerRow"
+  :pagination="pagination"
+  @request="onRequest"
   >
     <template v-slot:top>
       <q-btn-dropdown
@@ -48,7 +50,7 @@
 </template>
 
 <script>
-import { getAllPlayers } from '../contentCache';
+import { getAllPlayersSmart, getAllPlayersCount } from '../contentCache';
 
 export default {
   name: 'PagePlayerList',
@@ -113,6 +115,14 @@ export default {
           },
         },
       ],
+      pagination: {
+        page: 1,
+        // eslint-disable-next-line no-restricted-globals
+        rowsPerPage: Math.min(Math.max(Math.floor((screen.availHeight - 200) / 50), 6), 26) - 1,
+        rowsNumber: 0,
+        sortBy: 'cwid',
+        descending: true,
+      },
       loading: false,
       filter: '',
       serverSelected: 'EUCW',
@@ -121,12 +131,9 @@ export default {
   },
   mounted() {
     this.loading = true;
-    getAllPlayers(this.serverSelected).then((data) => {
-      this.players = data;
-      this.loading = false;
-    }, (error) => {
-      this.loading = false;
-      console.error(error);
+    this.onRequest({
+      pagination: this.pagination,
+      filter: this.filter,
     });
   },
   methods: {
@@ -135,13 +142,35 @@ export default {
     },
     selectServer(key) {
       this.serverSelected = key;
+      this.onRequest({
+        pagination: this.pagination,
+        filter: this.filter,
+      });
+    },
+    onRequest(props) {
+      const {
+        page,
+        rowsPerPage,
+        sortBy,
+        descending,
+      } = props.pagination;
+      const {
+        filter,
+      } = props;
       this.loading = true;
-      getAllPlayers(this.serverSelected).then((data) => {
-        this.players = data;
-        this.loading = false;
-      }, (error) => {
-        this.loading = false;
-        console.error(error);
+      getAllPlayersCount(this.serverSelected, this.filter).then((rowsNumber) => {
+        this.pagination.rowsNumber = rowsNumber;
+        const fetchCount = rowsPerPage === 0 ? rowsNumber : rowsPerPage;
+        const startRow = (page - 1) * rowsPerPage;
+        getAllPlayersSmart(this.serverSelected, startRow, fetchCount, filter, sortBy, descending ? 'desc' : 'asc').then((returnedData) => {
+          this.pagination.rowsNumber = rowsNumber;
+          this.players.splice(0, this.players.length, ...returnedData);
+          this.pagination.page = page;
+          this.pagination.rowsPerPage = rowsPerPage;
+          this.pagination.sortBy = sortBy;
+          this.pagination.descending = descending;
+          this.loading = false;
+        });
       });
     },
   },

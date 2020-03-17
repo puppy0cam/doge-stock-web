@@ -232,3 +232,46 @@ function mapValue(value) {
 };
 /** @type {Map<string, {expires:number;data:{cwid:string;ign:string;castle:string;guild_tag:string|null;}[]}} */
 getAllPlayers.cache = new Map();
+
+/**
+ * @param {"eucw"|"ru"} server
+ * @param {number} startRow
+ * @param {number} fetchCount
+ * @param {string} filter
+ * @param {"cwid"|"castle"|"ign"|"guild_tag"} sortBy
+ * @param {"asc"|"desc"} direction
+ */
+export async function getAllPlayersSmart(server, startRow, fetchCount, filter, sortBy, direction) {
+  /** @type {{schemaVersion:string;data:{cwid:string;ign:string;castle:string;guild_tag:string|null;}[];}} */
+  const result = await sendRequest(`/spai/player/all/smart?server=${server}&startRow=${startRow}&fetchCount=${fetchCount}&sortBy=${sortBy}&direction=${direction}&filter=${encodeURIComponent(filter)}`);
+  if (result.schemaVersion !== '1.0.0') {
+    throw new Error('Schema is out of date');
+  }
+  return result.data.map(getAllPlayersSmart.mapValue);
+}
+getAllPlayersSmart.mapValue =
+/** @param {{cwid:string;ign:string;castle:string;guild_tag:string|null;}} value */
+function mapValue(value) {
+  return {
+    cwid: value.cwid,
+    ign: value.ign,
+    castle: value.castle,
+    guild_tag: value.guild_tag,
+  };
+};
+
+/**
+ * @param {"eucw"|"ru"} server
+ * @param {string} filter
+ */
+export async function getAllPlayersCount(server, filter) {
+  /** @type {{schemaVersion:string;data:number;}} */
+  const result = await sendRequest(`/spai/player/count?server=${server}&filter=${filter}`);
+  if (result.schemaVersion !== '1.0.1') {
+    throw new Error('Schema is out of date');
+  }
+  if (result.data === 0) {
+    throw new Error('Invalid');
+  }
+  return result.data;
+}
