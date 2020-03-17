@@ -25,6 +25,9 @@ const {
   },
 } = require('fs');
 const {
+  gzip,
+} = require('zlib');
+const {
   normalize,
   join,
   parse: parsePath,
@@ -87,6 +90,103 @@ function getKnexInstanceForServer(server) {
 const spaiPlayerAllListCache = new WeakMap();
 /** @type {WeakMap<import('knex'), {expires:number;data:Buffer;}} */
 const spaiGuildAllListCache = new WeakMap();
+// eslint-disable-next-line max-len
+/** @type {Map<string, {stats:import('fs').Stats;uncompressedCache:Promise<Buffer>;gzipCompressedCache:Promise<Buffer>;}>} */
+const fileSystemCache = new Map();
+/**
+ * @param {string} localPath
+ * @param {import('http').ServerResponse} response
+ * @param {"gzip"|"none"} mode
+ * @param {number} browserCacheTime how many seconds the browser can hold on to this in the cache.
+ * @param {string} contentType
+ */
+async function sendFileToBrowser(localPath, response, mode, browserCacheTime, contentType) {
+  'use strict';
+
+  /** @type {import('fs').Stats} */
+  let currentStats;
+  try {
+    currentStats = await stat(localPath);
+  } catch {
+    response.writeHead(404, {
+      'Content-Length': 0,
+    });
+    response.end();
+    return;
+  }
+  if (!currentStats.isFile()) {
+    response.writeHead(404, {
+      'Content-Length': 0,
+    });
+    response.end();
+    return;
+  }
+  let willCacheHit = false;
+  if (fileSystemCache.has(localPath)) {
+    const cache = fileSystemCache.get(localPath);
+    if (isDeepStrictEqual(cache.stats, currentStats)) {
+      willCacheHit = true;
+    }
+  }
+  if (!willCacheHit) {
+    console.debug('Cache was missed for %s', localPath);
+    const fileRead = readFile(localPath);
+    const cacheResult = {
+      stats: currentStats,
+      uncompressedCache: fileRead,
+      gzipCompressedCache: new Promise((resolve, reject) => {
+        'use strict';
+
+        fileRead.then((content) => {
+          'use strict';
+
+          gzip(content, (error, result) => {
+            'use strict';
+
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          });
+        }, reject);
+      }),
+    };
+    fileSystemCache.set(localPath, cacheResult);
+  }
+  const hitCache = fileSystemCache.get(localPath);
+  if (mode === 'gzip') {
+    hitCache.gzipCompressedCache.then((value) => {
+      'use strict';
+
+      response.writeHead(200, {
+        'Content-Length': value.byteLength,
+        'Cache-Control': `Public, Max-Age=${browserCacheTime}`,
+        'Content-Type': contentType,
+        'Content-Encoding': 'gzip',
+      });
+      response.write(value);
+      response.end();
+    });
+  } else if (mode === 'none') {
+    hitCache.uncompressedCache.then((value) => {
+      'use strict';
+
+      response.writeHead(200, {
+        'Content-Length': value.byteLength,
+        'Cache-Control': `Public, Max-Age=${browserCacheTime}`,
+        'Content-Type': contentType,
+      });
+      response.write(value);
+      response.end();
+    });
+  } else {
+    response.writeHead(500, {
+      'Content-Length': 0,
+    });
+    response.end();
+  }
+}
 async function onReceiveRequest(request, response) {
   'use strict';
 
@@ -647,30 +747,22 @@ async function onReceiveRequest(request, response) {
       ext = '.html';
       filePathname = join(filePathname, 'index.html');
     }
-    try {
-      const file = await stat(filePathname);
-      if (file.isFile()) {
-        let cacheTime = 86400;
-        if (ext === '.html') {
-          cacheTime = 60;
-        }
-        response.writeHead(200, {
-          'Content-Type': mimeType[ext] || 'text/plain',
-          'Content-Length': file.size,
-          'Cache-Control': `Public, Max-Age=${cacheTime}`,
-        });
-        const stream = createReadStream(filePathname, {
-          autoClose: true,
-          emitClose: true,
-        });
-        stream.pipe(response, {
-          end: true,
-        });
-      } else {
-        throw new Error('Not a valid path');
+    let cacheTime = 86400;
+    if (ext === '.html') {
+      cacheTime = 60;
+    }
+    let mode = 'none';
+    if (request.headers['accept-encoding']) {
+      const acceptedEncoding = request.headers['accept-encoding'];
+      const encodings = acceptedEncoding.split(', ');
+      if (encodings.includes('gzip')) {
+        mode = 'gzip';
       }
-    } catch (e) {
-      response.writeHead(404, {
+    }
+    try {
+      await sendFileToBrowser(filePathname, response, mode, cacheTime, mimeType[ext] || 'text/plain');
+    } catch {
+      response.writeHead(500, {
         'Content-Length': 0,
       });
       response.end();
