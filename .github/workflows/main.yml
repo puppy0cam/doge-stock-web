@@ -2,7 +2,7 @@
 
 name: Build and Publish
 
-# Controls when the action will run. Triggers the workflow on push or pull request 
+# Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
 on:
   push:
@@ -23,18 +23,24 @@ jobs:
     # Runs a single command using the runners shell
     - name: Install dependencies
       run: npm install
-      
+
     - name: Build with Quasar
       run: quasar build
-      
+
     - name: Copy Build Result
       run: cp -rf  dist /home/puppy0cam/DogeStock/Web/
 
     - name: Copy server file
       run: cp server.cjs -f /home/puppy0cam/DogeStock/Web/server.cjs
-      
+
     - name: Copy Credentials File
       run: cp credentials.cjs -f /home/puppy0cam/DogeStock/Web/credentials.cjs
-      
+
     - name: Restart server
       run: pm2 restart DogeStockWeb
+
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: dist
+        path: dist
