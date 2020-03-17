@@ -11,7 +11,8 @@ While you are welcome to use the website,
 Other developers are also welcome to use this service but,
 Don't abuse it or take things too far or I'll start blocking your requests.
 Please take note that the webserver is intentionally placed away from the database, and queries may not be fulfilled at such a high rate.
-Caching is planned for some methods, but not yet implemented so take care in the early days.
+Serverside caching is enabled for some intensive methods,
+Your browser may also cache some requests for a period
 
  - /spai/player/history?server&id
  - /spai/player/find?server&name
@@ -19,7 +20,7 @@ Caching is planned for some methods, but not yet implemented so take care in the
  - /spai/guild/members?server&tag
  - /spai/guild/all?server
  - /spai/player/all?server
- - /spai/player/count?server
+ - /spai/player/count?server&filter
  - /spai/player/all/smart?server&startRow&fetchCount&filter&sortBy
 
 The \`server\` parameter expects that you specify "eucw" or "ru". Some aliases are accepted, but not guarunteed.
