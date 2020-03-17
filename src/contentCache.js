@@ -270,8 +270,5 @@ export async function getAllPlayersCount(server, filter) {
   if (result.schemaVersion !== '1.0.1') {
     throw new Error('Schema is out of date');
   }
-  if (result.data === 0) {
-    throw new Error('Invalid');
-  }
   return result.data;
 }
