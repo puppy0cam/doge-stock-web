@@ -1,6 +1,7 @@
 /* eslint-disable operator-linebreak */
 /* eslint-disable no-restricted-globals */
 /* eslint-disable max-len */
+
 /** @type {{server:"eucw"|"ru";data:{item:string;qty:number;price:number;sellerId:string;sellerName:string;sellerCastle:string;buyerId:string;buyerName:string;buyerCastle:string;}}[]} */
 export const deals = [];
 /** @type {{server:"eucw"|"ru";data:{item:string;qty:number;price:number;sellerId:string;sellerName:string;sellerCastle:string;}}[]} */
