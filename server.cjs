@@ -650,10 +650,14 @@ async function onReceiveRequest(request, response) {
     try {
       const file = await stat(filePathname);
       if (file.isFile()) {
+        let cacheTime = 86400;
+        if (ext === '.html') {
+          cacheTime = 60;
+        }
         response.writeHead(200, {
           'Content-Type': mimeType[ext] || 'text/plain',
           'Content-Length': file.size,
-          'Cache-Control': 'Public, Max-Age=600',
+          'Cache-Control': `Public, Max-Age=${cacheTime}`,
         });
         const stream = createReadStream(filePathname, {
           autoClose: true,
