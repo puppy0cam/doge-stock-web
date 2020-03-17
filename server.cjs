@@ -524,7 +524,22 @@ async function onReceiveRequest(request, response) {
       response.end();
       return;
     }
-    if (params.filter.match(/[^Ёёа-яА-Я\w\d _'-]/)) {
+    if (params.filter.match(/[^Ёёа-яА-Я\w\d _'-]/u)
+      && params.filter !== '🌑'
+      && params.filter !== '🐉'
+      && params.filter !== '⚱️'
+      && params.filter !== '🥔'
+      && params.filter !== '🦈'
+      && params.filter !== '🦌'
+      && params.filter !== '🐺'
+      && params.filter !== '🦅'
+      && params.filter !== '🐢'
+      && params.filter !== '🍆'
+      && params.filter !== '☘️'
+      && params.filter !== '🌹'
+      && params.filter !== '🍁'
+      && params.filter !== '🦇'
+      && params.filter !== '🖤') {
       response.writeHead(400, {
         'Content-Length': 0,
       });
