@@ -129,4 +129,8 @@ export default {
     },
   },
 };
+function onTelegramAuth(user) {
+  console.debug(user);
+}
+window.onTelegramAuth = onTelegramAuth;
 </script>
