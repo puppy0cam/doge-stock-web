@@ -944,6 +944,9 @@ function onServerUpgrade(request, socket, head) {
 
                     client.send(msg.content);
                   });
+                }, {
+                  exclusive: true,
+                  noAck: true,
                 }),
               ]).then(() => {
                 'use strict';
