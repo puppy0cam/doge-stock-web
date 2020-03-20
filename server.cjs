@@ -17,7 +17,6 @@ const {
   parse,
 } = require('url');
 const {
-  createReadStream,
   watchFile,
   promises: {
     stat,

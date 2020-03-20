@@ -8,6 +8,61 @@ export const deals = [];
 export const offers = [];
 /** @type {{server:"eucw"|"ru";data:{isChallenge:boolean;isGuildDuel:boolean;winner:{id:string;name:string;tag?:string;castle:string;level:number;hp:number;};loser:{id:string;name:string;tag?:string;castle:string;level:number;hp:number;};}}[]} */
 export const duels = [];
+class ActiveWebsocket extends EventTarget {
+  /**
+   * @param {string} name
+   * @param {string} url
+   */
+  constructor(name, url) {
+    super();
+    this.isConnecting = false;
+    this.isClosed = true;
+    this.name = name;
+    this.url = url;
+    /** @type {WebSocket | null} */
+    this.ws = null;
+    this.eventDispatcher = (ev) => this.dispatchEvent(new ev.constructor(ev.type, ev));
+  }
+
+  connect() {
+    if (this.isConnecting) {
+      throw new Error('Already connecting');
+    }
+    if (!this.isClosed) {
+      throw new Error('Already connected');
+    }
+    // eslint-disable-next-line no-multi-assign
+    const ws = this.ws = new WebSocket(this.url);
+    this.isConnecting = true;
+    ws.addEventListener('open', (ev) => {
+      this.isClosed = false;
+      this.isConnecting = false;
+      console.debug('WebSocket connection to %s opened', this.url, ev);
+      if (!this.eventDispatcher(ev)) {
+        ev.preventDefault();
+      }
+    });
+    ws.addEventListener('close', (ev) => {
+      this.isClosed = true;
+      this.isConnecting = false;
+      console.debug('WebSocket connection to %s closed', this.url, ev);
+      if (this.eventDispatcher(ev)) {
+        // this.connect();
+      } else {
+        ev.preventDefault();
+      }
+    });
+    ws.addEventListener('error', (ev) => {
+      console.error('WebSocket connection to %s errored', this.url, ev);
+      this.eventDispatcher(ev);
+    });
+    ws.addEventListener('message', (ev) => {
+      if (!this.eventDispatcher(ev)) {
+        ev.preventDefault();
+      }
+    });
+  }
+}
 
 let websocketPrefix;
 if (location.protocol === 'https:') {
@@ -15,17 +70,11 @@ if (location.protocol === 'https:') {
 } else {
   websocketPrefix = 'ws://';
 }
+/** @type {ActiveWebsocket[]} */
+export const activeWebsockets = [];
 for (const server of ['eucw', 'ru']) {
-  const duelsWebsocket = new WebSocket(`${websocketPrefix}${location.hostname}/${server}/duels`);
-  duelsWebsocket.addEventListener('close', (ev) => {
-    console.log('%s duels connection closed', server, ev);
-  });
-  duelsWebsocket.addEventListener('error', (ev) => {
-    console.error('%s duels connection error', server, ev);
-  });
-  duelsWebsocket.addEventListener('open', (ev) => {
-    console.log('%s duels connection open', server, ev);
-  });
+  const duelsWebsocket = new ActiveWebsocket(`${server} duels`, `${websocketPrefix}${location.hostname}:${location.port}/${server}/duels`);
+  activeWebsockets.push(duelsWebsocket);
   duelsWebsocket.addEventListener('message', (message) => {
     message.data.text().then(JSON.parse).then((data) => {
       duels.push({
@@ -36,16 +85,9 @@ for (const server of ['eucw', 'ru']) {
       console.error('%s duels failed to be parsed', server, message, error);
     });
   });
-  const dealsWebsocket = new WebSocket(`${websocketPrefix}${location.hostname}/${server}/deals`);
-  dealsWebsocket.addEventListener('close', (ev) => {
-    console.log('%s deals connection closed', server, ev);
-  });
-  dealsWebsocket.addEventListener('error', (ev) => {
-    console.error('%s deals connection error', server, ev);
-  });
-  dealsWebsocket.addEventListener('open', (ev) => {
-    console.log('%s deals connection open', server, ev);
-  });
+  duelsWebsocket.connect();
+  const dealsWebsocket = new ActiveWebsocket(`${server} deals`, `${websocketPrefix}${location.hostname}:${location.port}/${server}/deals`);
+  activeWebsockets.push(dealsWebsocket);
   dealsWebsocket.addEventListener('message', (message) => {
     message.data.text().then(JSON.parse).then((data) => {
       deals.push({
@@ -56,16 +98,9 @@ for (const server of ['eucw', 'ru']) {
       console.error('%s deals failed to be parsed', server, message, error);
     });
   });
-  const offersWebsocket = new WebSocket(`${websocketPrefix}${location.hostname}/${server}/offers`);
-  offersWebsocket.addEventListener('close', (ev) => {
-    console.log('%s offers connection closed', server, ev);
-  });
-  offersWebsocket.addEventListener('error', (ev) => {
-    console.error('%s offers connection error', server, ev);
-  });
-  offersWebsocket.addEventListener('open', (ev) => {
-    console.log('%s offers connection open', server, ev);
-  });
+  dealsWebsocket.connect();
+  const offersWebsocket = new ActiveWebsocket(`${server} offers`, `${websocketPrefix}${location.hostname}:${location.port}/${server}/offers`);
+  activeWebsockets.push(offersWebsocket);
   offersWebsocket.addEventListener('message', (message) => {
     message.data.text().then(JSON.parse).then((data) => {
       offers.push({
@@ -76,6 +111,7 @@ for (const server of ['eucw', 'ru']) {
       console.error('%s offers failed to be parsed', server, message, error);
     });
   });
+  offersWebsocket.connect();
 }
 function sendRequest(url) {
   return fetch(url).then(sendRequest.toJson);

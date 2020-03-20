@@ -1,3 +1,4 @@
+
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
@@ -14,6 +15,14 @@
         <q-toolbar-title>
           {{ $t('app_name')}}
         </q-toolbar-title>
+        <q-btn
+        flat
+        v-for="ws in websockets" v-bind:key="ws"
+        :label="$t('ws_disconnected_want_reconnect', ws)"
+        :loading="ws.isConnecting"
+        @click="reconnectWebsocket(ws)"
+        >
+        </q-btn>
 
         <div>{{ $t('game_name') }}</div>
       </q-toolbar>
@@ -48,6 +57,7 @@
 
 <script>
 import EssentialLink from 'components/EssentialLink';
+import { activeWebsockets } from '../contentCache';
 
 export default {
   name: 'MainLayout',
@@ -91,7 +101,32 @@ export default {
           icon: 'remove_red_eye',
         },
       ],
+      websockets: [],
     };
+  },
+  mounted() {
+    this.updateWebsockets();
+    // eslint-disable-next-line no-multi-assign
+    const forceUpdate = this.forceUpdate = () => this.updateWebsockets();
+    for (const ws of activeWebsockets) {
+      ws.addEventListener('open', forceUpdate);
+      ws.addEventListener('close', forceUpdate);
+    }
+  },
+  methods: {
+    reconnectWebsocket(ws) {
+      ws.ws.connect();
+      this.forceUpdate();
+    },
+    updateWebsockets() {
+      this.websockets = activeWebsockets.filter((ws) => ws.isConnecting || ws.isClosed)
+        .map((ws) => ({
+          isConnecting: ws.isConnecting,
+          isClosed: ws.isClosed,
+          name: ws.name,
+          ws,
+        }));
+    },
   },
 };
 </script>

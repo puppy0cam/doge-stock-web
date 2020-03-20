@@ -136,4 +136,6 @@ export default {
   player_list_col_guild_tag_label: 'Guild',
   player_list_col_guild_tag_value_unknown: '',
   player_list_col_guild_tag_value_empty: 'None',
+  ws_disconnected_reconnecting: 'Reconnecting {name}',
+  ws_disconnected_want_reconnect: 'Reconnect to {name}',
 };
