@@ -14,6 +14,7 @@ const routes = [
       { path: 'playerhistory/:server/:id', component: () => import('pages/PlayerHistory.vue'), props: true },
       { path: 'auth/error/outdated', component: () => import('pages/AuthOutdated.vue') },
       { path: 'auth/error/invalid', component: () => import('pages/AuthInvalid.vue') },
+      { path: 'auth/success/:token', component: () => import('pages/AuthSuccess.vue'), props: true },
     ],
   },
 ];

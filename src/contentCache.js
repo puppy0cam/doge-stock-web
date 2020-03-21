@@ -63,6 +63,10 @@ class ActiveWebsocket extends EventTarget {
     });
   }
 }
+/** @param {string} token */
+export async function registerUserToken(token) {
+  localStorage.setItem('telegramUserToken', token);
+}
 
 let websocketPrefix;
 if (location.protocol === 'https:') {
@@ -308,4 +312,16 @@ export async function getAllPlayersCount(server, filter) {
     throw new Error('Schema is out of date');
   }
   return result.data;
+}
+/** @returns {Promise<{id:number;first_name:string;last_name?:string;username?:string;photo_url?:string;}>} */
+export async function getTelegramUserDetails() {
+  if (getTelegramUserDetails.cache) {
+    return {
+      ...getTelegramUserDetails.cache,
+    };
+  }
+  getTelegramUserDetails.cache = await sendRequest(`/auth/telegram/check?token=${localStorage.getItem('telegramUserToken')}`);
+  return {
+    ...getTelegramUserDetails.cache,
+  };
 }
