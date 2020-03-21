@@ -138,4 +138,10 @@ export default {
   player_list_col_guild_tag_value_empty: 'None',
   ws_disconnected_reconnecting: 'Reconnecting {name}',
   ws_disconnected_want_reconnect: 'Reconnect to {name}',
+  auth_success_header: 'Authentication Successful!',
+  auth_success_waiting_text: 'Please wait a moment as we retrieve your information',
+  auth_invalid_header: 'Authentication Invalid',
+  auth_invalid_description: 'Unfortunately, the data sent was invalid\nWe were unable to validate your identity\nTry pressing the Sign In button again',
+  auth_outdated_header: 'Out of Date',
+  auth_outdated_description: 'This authentication request is out of date, and can no longer be used to authenticate you.\nPlease press the Sign In button again',
 };

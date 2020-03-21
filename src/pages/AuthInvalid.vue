@@ -1,9 +1,7 @@
 <template>
 <q-page>
-  <h1>Authentication Invalid</h1>
-  <p>Unfortunately, the data sent was invalid</p>
-  <p>We were unable to validate your identity</p>
-  <p>Try pressing the Sign In button again</p>
+  <h3>{{ $t('auth_invalid_header') }}</h3>
+  <p>{{ $t('auth_invalid_description') }}
 </q-page>
 </template>
 

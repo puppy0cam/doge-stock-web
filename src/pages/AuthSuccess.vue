@@ -1,11 +1,11 @@
 <template>
 <q-page>
-  <h1>Authentication successful!</h1>
+  <h3>{{ $t('auth_success_header') }}</h3>
   <q-card v-if="userData" class="userDataCard">
     <img v-if="userData.photo_url" :src="userData.photo_url" class="userProfileImage" />
     <p>{{ userData.first_name }} {{ userData.last_name }}</p>
   </q-card>
-  <p v-else>Please wait a moment as we retrieve your information</p>
+  <p v-else>{{ $t('auth_success_waiting_text') }}</p>
 </q-page>
 </template>
 
