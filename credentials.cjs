@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable */
 
 const fs = require('fs');
 const util = require('util');
