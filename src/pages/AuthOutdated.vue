@@ -5,3 +5,9 @@
   <p>Please press the Sign in button again</p>
 </q-page>
 </template>
+
+<script>
+export default {
+  name: 'PageAuthOutdated',
+};
+</script>

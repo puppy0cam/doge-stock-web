@@ -6,3 +6,9 @@
   <p>Try pressing the Sign In button again</p>
 </q-page>
 </template>
+
+<script>
+export default {
+  name: 'PageAuthInvalid',
+};
+</script>
