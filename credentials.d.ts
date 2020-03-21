@@ -9,6 +9,7 @@ export interface Config {
   servers: {
     trueName: string;
     aliases: string[];
+    botToken: string;
     database: {
         client: 'mysql';
         connection: {

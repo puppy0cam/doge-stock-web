@@ -106,6 +106,8 @@ function getConfig(onConfigReloaded) {
               throw new TypeError('servers[item].publicExchanges must be an array');
             } else if (typeof server.trueName !== 'string') {
               throw new TypeError('servers[item].trueName must be a string');
+            } else if (typeof server.botToken !== 'string') {
+              throw new TypeError('servers[item].botToken must be a string');
             } else {
               for (const i of server.publicExchanges) {
                 if (typeof i !== 'string') {
