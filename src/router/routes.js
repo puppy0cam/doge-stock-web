@@ -13,6 +13,7 @@ const routes = [
       { path: 'guildmembers/:server/:tag', component: () => import('pages/GuildMembers.vue'), props: true },
       { path: 'playerhistory/:server/:id', component: () => import('pages/PlayerHistory.vue'), props: true },
       { path: 'auth/error/outdated', component: () => import('pages/AuthOutdated.vue') },
+      { path: 'auth/error/invalid', component: () => import('pages/AuthInvalid.vue') },
     ],
   },
 ];
