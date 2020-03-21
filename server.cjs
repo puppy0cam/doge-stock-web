@@ -4,6 +4,7 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-unused-vars */
 /* eslint-disable strict */
+const uuid = require('uuid');
 const {
   connect: amqpConnect,
 } = require('amqplib');
@@ -37,6 +38,10 @@ const knexModule = require('knex');
 const {
   isDeepStrictEqual,
 } = require('util');
+const {
+  createHash,
+  createHmac,
+} = require('crypto');
 /** @type {typeof import('./credentials')} */
 const {
   getConfig,
@@ -61,7 +66,9 @@ const mimeType = {
   '.eot': 'application/vnd.ms-fontobject',
   '.ttf': 'application/x-font-ttf',
 };
-
+// eslint-disable-next-line max-len
+/** @type {Map<string, {id:string;first_name:string;last_name:string;username:string;photo_url:string;auth_date:string;hash:string;}>} */
+const verifiedUserAuthentications = new Map();
 /** @type {{server:import('ws').Server;path:string;}[]} */
 const websockets = [];
 /** @type {import('./credentials').Config} */
@@ -185,6 +192,36 @@ async function sendFileToBrowser(localPath, response, mode, browserCacheTime, co
     });
     response.end();
   }
+}
+/** @type {WeakMap<import('./credentials').Config, Buffer[]>} */
+const tokenHashes = new WeakMap();
+
+function checkBotAuthSignature(data) {
+  if (!tokenHashes.has(currentConfig)) {
+    const newTokenHashes = [];
+    for (const server of currentConfig.servers) {
+      newTokenHashes.push(createHash('sha256').update(server.botToken).digest());
+    }
+    tokenHashes.set(currentConfig, newTokenHashes);
+  }
+  const {
+    hash,
+  } = data;
+  const checkString = Object.keys(data)
+    .filter((key) => key !== 'hash')
+    .sort()
+    .map((key) => `${key}=${data[key]}`)
+    .join('\n');
+  const tokens = tokenHashes.get(currentConfig);
+  for (const token of tokens) {
+    const hmac = createHmac('sha256', token)
+      .update(checkString)
+      .digest('hex');
+    if (hmac === hash) {
+      return true;
+    }
+  }
+  return false;
 }
 async function onReceiveRequest(request, response) {
   'use strict';
@@ -736,7 +773,70 @@ async function onReceiveRequest(request, response) {
       });
       response.end();
     }
+  } else if (path.pathname === '/auth/telegram') {
+    if (checkBotAuthSignature(params)) {
+      if (Date.now() / 1000 - 60 > Number(params.auth_date)) {
+        response.writeHead(302, {
+          Location: '/#/auth/error/outdated',
+        });
+        response.end();
+      } else {
+        let userUUID = uuid();
+        while (verifiedUserAuthentications.has(userUUID)) {
+          userUUID = uuid();
+        }
+        verifiedUserAuthentications.set(userUUID, params);
+        response.writeHead(302, {
+          Location: `/#/auth/success/${userUUID}`,
+        });
+        response.end();
+      }
+    } else {
+      response.writeHead(302, {
+        Location: '/#/auth/error/invalid',
+      });
+      response.end();
+    }
+  } else if (path.pathname === '/auth/telegram/check') {
+    if (!params.token) {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (!verifiedUserAuthentications.has(params.token)) {
+      response.writeHead(403, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    const originalQuery = verifiedUserAuthentications.get(params.token);
+    const res = Buffer.from(JSON.stringify({
+      id: Number(originalQuery.id),
+      first_name: originalQuery.first_name,
+      last_name: originalQuery.last_name,
+      username: originalQuery.username,
+      photo_url: originalQuery.photo_url,
+    }));
+    response.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Content-Length': res.byteLength,
+    });
+    response.write(res);
+    response.end();
   } else {
+    if (path.pathname === '/' && path.query) {
+      const query = querystring.parse(path.query);
+      if (!checkBotAuthSignature(query)) {
+        response.writeHead(403, {
+          'Content-Length': 0,
+        });
+        response.end();
+        return;
+      }
+    }
     const sanitaryPath = normalize(path.pathname).replace(pathSanitizer, '');
     let filePathname = join(currentConfig.webserverHomeDirectory, sanitaryPath);
     let {
