@@ -4,7 +4,7 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-unused-vars */
 /* eslint-disable strict */
-const uuid = require('uuid');
+const uuid = require('uuid').v4;
 const {
   connect: amqpConnect,
 } = require('amqplib');
