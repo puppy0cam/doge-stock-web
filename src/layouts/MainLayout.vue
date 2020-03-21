@@ -32,12 +32,12 @@
       v-model="leftDrawerOpen"
       show-if-above
       bordered
-      content-class="bg-grey-1"
+      :content-class="$q.dark.isActive ? 'bg-grey-8' : 'bg-grey-1'"
     >
       <q-list>
         <q-item-label
           header
-          class="text-grey-8"
+          :class="$q.dark.isActive ? 'text-gray-1' : 'text-grey-8'"
         >
           {{ $t('navigation_description') }}
         </q-item-label>
@@ -105,6 +105,7 @@ export default {
     };
   },
   mounted() {
+    this.$q.dark.set(true);
     this.updateWebsockets();
     // eslint-disable-next-line no-multi-assign
     const forceUpdate = this.forceUpdate = () => this.updateWebsockets();
