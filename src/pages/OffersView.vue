@@ -27,13 +27,11 @@
 </template>
 
 <script>
-import { offers } from '../contentCache';
-
 export default {
   name: 'PageOffersView',
   data() {
     return {
-      offers,
+      offers: [],
       filter: '',
       columns: [
         {
@@ -75,6 +73,14 @@ export default {
         },
       ],
     };
+  },
+  mounted() {
+    import('../contentCache.js').then((contentCache) => {
+      const {
+        offers,
+      } = contentCache;
+      this.offers = offers;
+    });
   },
   methods: {
     clickOfferRow(event, row) {

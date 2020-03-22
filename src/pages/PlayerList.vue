@@ -50,8 +50,6 @@
 </template>
 
 <script>
-import { getAllPlayersSmart, getAllPlayersCount } from '../contentCache';
-
 export default {
   name: 'PagePlayerList',
   data() {
@@ -130,7 +128,6 @@ export default {
     };
   },
   mounted() {
-    this.loading = true;
     this.onRequest({
       pagination: this.pagination,
       filter: this.filter,
@@ -158,18 +155,24 @@ export default {
         filter,
       } = props;
       this.loading = true;
-      getAllPlayersCount(this.serverSelected, this.filter).then((rowsNumber) => {
-        this.pagination.rowsNumber = rowsNumber;
-        const fetchCount = rowsPerPage === 0 ? rowsNumber : rowsPerPage;
-        const startRow = (page - 1) * rowsPerPage;
-        getAllPlayersSmart(this.serverSelected, startRow, fetchCount, filter, sortBy, descending ? 'desc' : 'asc').then((returnedData) => {
+      import('../contentCache.js').then((contentCache) => {
+        const {
+          getAllPlayersCount,
+          getAllPlayersSmart,
+        } = contentCache;
+        getAllPlayersCount(this.serverSelected, this.filter).then((rowsNumber) => {
           this.pagination.rowsNumber = rowsNumber;
-          this.players.splice(0, this.players.length, ...returnedData);
-          this.pagination.page = page;
-          this.pagination.rowsPerPage = rowsPerPage;
-          this.pagination.sortBy = sortBy;
-          this.pagination.descending = descending;
-          this.loading = false;
+          const fetchCount = rowsPerPage === 0 ? rowsNumber : rowsPerPage;
+          const startRow = (page - 1) * rowsPerPage;
+          getAllPlayersSmart(this.serverSelected, startRow, fetchCount, filter, sortBy, descending ? 'desc' : 'asc').then((returnedData) => {
+            this.pagination.rowsNumber = rowsNumber;
+            this.players.splice(0, this.players.length, ...returnedData);
+            this.pagination.page = page;
+            this.pagination.rowsPerPage = rowsPerPage;
+            this.pagination.sortBy = sortBy;
+            this.pagination.descending = descending;
+            this.loading = false;
+          });
         });
       });
     },

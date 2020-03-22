@@ -10,8 +10,6 @@
 </template>
 
 <script>
-import { getTelegramUserDetails, registerUserToken } from '../contentCache.js';
-
 export default {
   name: 'AuthSucccess',
   data() {
@@ -21,14 +19,20 @@ export default {
     };
   },
   mounted() {
-    registerUserToken(this.token).then(() => {
-      getTelegramUserDetails().then((response) => {
-        this.userData = response;
+    import('../contentCache.js').then((contentCache) => {
+      const {
+        getTelegramUserDetails,
+        registerUserToken,
+      } = contentCache;
+      registerUserToken(this.token).then(() => {
+        getTelegramUserDetails().then((response) => {
+          this.userData = response;
+        }, (error) => {
+          console.error(error);
+        });
       }, (error) => {
         console.error(error);
       });
-    }, (error) => {
-      console.error(error);
     });
   },
   props: {

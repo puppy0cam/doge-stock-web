@@ -21,13 +21,11 @@
 </template>
 
 <script>
-import { duels } from '../contentCache';
-
 export default {
   name: 'PageDuelsView',
   data() {
     return {
-      duels,
+      duels: [],
       filter: '',
       columns: [
         {
@@ -121,6 +119,14 @@ export default {
         },
       ],
     };
+  },
+  mounted() {
+    import('../contentCache.js').then((contentCache) => {
+      const {
+        duels,
+      } = contentCache;
+      this.duels = duels;
+    });
   },
 };
 

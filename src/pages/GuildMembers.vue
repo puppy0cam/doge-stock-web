@@ -27,8 +27,6 @@
 </template>
 
 <script>
-import { getGuildMembers } from '../contentCache';
-
 export default {
   name: 'PageGuildMembers',
   data() {
@@ -63,12 +61,17 @@ export default {
   },
   mounted() {
     this.loading = true;
-    getGuildMembers(this.server, this.tag).then((members) => {
-      this.members = members;
-      this.loading = false;
-    }, (error) => {
-      this.loading = false;
-      console.error(error);
+    import('../contentCache.js').then((contentCache) => {
+      const {
+        getGuildMembers,
+      } = contentCache;
+      getGuildMembers(this.server, this.tag).then((members) => {
+        this.members = members;
+        this.loading = false;
+      }, (error) => {
+        this.loading = false;
+        console.error(error);
+      });
     });
   },
   props: {

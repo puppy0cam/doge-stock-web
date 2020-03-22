@@ -74,14 +74,11 @@
 </template>
 
 <script>
-import EssentialLink from 'components/EssentialLink';
-import { activeWebsockets, getTelegramUserDetails } from '../contentCache';
-
 export default {
   name: 'MainLayout',
 
   components: {
-    EssentialLink,
+    EssentialLink: () => import('components/EssentialLink.vue'),
   },
 
   data() {
@@ -126,19 +123,25 @@ export default {
     };
   },
   mounted() {
-    getTelegramUserDetails().then((data) => {
-      this.login = data;
-    }, (error) => {
-      console.warn(error);
-    });
     this.$q.dark.set(true);
     this.updateWebsockets();
     // eslint-disable-next-line no-multi-assign
     const forceUpdate = this.forceUpdate = () => this.updateWebsockets();
-    for (const ws of activeWebsockets) {
-      ws.addEventListener('open', forceUpdate);
-      ws.addEventListener('close', forceUpdate);
-    }
+    import('../contentCache.js').then((contentCache) => {
+      const {
+        activeWebsockets,
+        getTelegramUserDetails,
+      } = contentCache;
+      for (const ws of activeWebsockets) {
+        ws.addEventListener('open', forceUpdate);
+        ws.addEventListener('close', forceUpdate);
+      }
+      getTelegramUserDetails().then((data) => {
+        this.login = data;
+      }, (error) => {
+        console.warn(error);
+      });
+    });
   },
   methods: {
     reconnectWebsocket(ws) {
@@ -146,13 +149,18 @@ export default {
       this.forceUpdate();
     },
     updateWebsockets() {
-      this.websockets = activeWebsockets.filter((ws) => ws.isConnecting || ws.isClosed)
-        .map((ws) => ({
-          isConnecting: ws.isConnecting,
-          isClosed: ws.isClosed,
-          name: ws.name,
-          ws,
-        }));
+      import('../contentCache.js').then((contentCache) => {
+        const {
+          activeWebsockets,
+        } = contentCache;
+        this.websockets = activeWebsockets.filter((ws) => ws.isConnecting || ws.isClosed)
+          .map((ws) => ({
+            isConnecting: ws.isConnecting,
+            isClosed: ws.isClosed,
+            name: ws.name,
+            ws,
+          }));
+      });
     },
     clickLogoutButton() {
       localStorage.removeItem('telegramUserToken');

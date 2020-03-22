@@ -20,8 +20,6 @@
 </template>
 
 <script>
-import { getPlayerSpaiHistory } from '../contentCache';
-
 export default {
   name: 'PagePlayerHistory',
   data() {
@@ -75,12 +73,17 @@ export default {
   },
   mounted() {
     this.loading = true;
-    getPlayerSpaiHistory(this.server, this.id).then((history) => {
-      this.history = history;
-      this.loading = false;
-    }, (error) => {
-      this.loading = false;
-      console.error(error);
+    import('../contentCache.js').then((contentCache) => {
+      const {
+        getPlayerSpaiHistory,
+      } = contentCache;
+      getPlayerSpaiHistory(this.server, this.id).then((history) => {
+        this.history = history;
+        this.loading = false;
+      }, (error) => {
+        this.loading = false;
+        console.error(error);
+      });
     });
   },
   props: {

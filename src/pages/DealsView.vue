@@ -19,13 +19,11 @@
 </template>
 
 <script>
-import { deals } from '../contentCache';
-
 export default {
   name: 'PageDealsView',
   data() {
     return {
-      deals,
+      deals: [],
       filter: '',
       columns: [
         {
@@ -82,6 +80,14 @@ export default {
         },
       ],
     };
+  },
+  mounted() {
+    import('../contentCache.js').then((contentCache) => {
+      const {
+        deals,
+      } = contentCache;
+      this.deals = deals;
+    });
   },
 };
 

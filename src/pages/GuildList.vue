@@ -48,8 +48,6 @@
 </template>
 
 <script>
-import { getAllGuilds } from '../contentCache';
-
 export default {
   name: 'PageGuildList',
   data() {
@@ -82,14 +80,7 @@ export default {
     };
   },
   mounted() {
-    this.loading = true;
-    getAllGuilds(this.serverSelected).then((data) => {
-      this.guilds = data;
-      this.loading = false;
-    }, (error) => {
-      this.loading = false;
-      console.error(error);
-    });
+    this.selectServer(this.serverSelected);
   },
   methods: {
     clickGuildRow(event, row) {
@@ -98,12 +89,17 @@ export default {
     selectServer(key) {
       this.serverSelected = key;
       this.loading = true;
-      getAllGuilds(this.serverSelected).then((data) => {
-        this.guilds = data;
-        this.loading = false;
-      }, (error) => {
-        this.loading = false;
-        console.error(error);
+      import('../contentCache.js').then((contentCache) => {
+        const {
+          getAllGuilds,
+        } = contentCache;
+        getAllGuilds(this.serverSelected).then((data) => {
+          this.guilds = data;
+          this.loading = false;
+        }, (error) => {
+          this.loading = false;
+          console.error(error);
+        });
       });
     },
   },
