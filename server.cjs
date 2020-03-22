@@ -188,6 +188,7 @@ async function sendFileToBrowser(localPath, response, mode, browserCacheTime, co
         'Content-Type': contentType,
         'Content-Encoding': 'gzip',
         ETag: `W/"${currentStats.size},${currentStats.mtimeMs}"`,
+        Expires: new Date(Date.now() + (browserCacheTime * 1000)).toUTCString(),
       });
       response.write(value);
       response.end();
@@ -201,6 +202,7 @@ async function sendFileToBrowser(localPath, response, mode, browserCacheTime, co
         'Cache-Control': `Public, Max-Age=${browserCacheTime}`,
         'Content-Type': contentType,
         ETag: `W/"${currentStats.size},${currentStats.mtimeMs}"`,
+        Expires: new Date(Date.now() + (browserCacheTime * 1000)).toUTCString(),
       });
       response.write(value);
       response.end();
