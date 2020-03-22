@@ -66,6 +66,23 @@ const mimeType = {
   '.eot': 'application/vnd.ms-fontobject',
   '.ttf': 'application/x-font-ttf',
 };
+const cacheTimes = {
+  '.ico': 31557600,
+  '.html': 2419200,
+  '.js': 2419200,
+  '.json': 2419200,
+  '.css': 2419200,
+  '.png': 2419200,
+  '.jpg': 2419200,
+  '.wav': 2419200,
+  '.mp3': 2419200,
+  '.svg': 2419200,
+  '.pdf': 2419200,
+  '.zip': 2419200,
+  '.doc': 2419200,
+  '.eot': 2419200,
+  '.ttf': 2419200,
+};
 // eslint-disable-next-line max-len
 /** @type {Map<string, {id:string;first_name:string;last_name:string;username:string;photo_url:string;auth_date:string;hash:string;}>} */
 const verifiedUserAuthentications = new Map();
@@ -170,6 +187,7 @@ async function sendFileToBrowser(localPath, response, mode, browserCacheTime, co
         'Cache-Control': `Public, Max-Age=${browserCacheTime}`,
         'Content-Type': contentType,
         'Content-Encoding': 'gzip',
+        ETag: `W/"${currentStats.size},${currentStats.mtimeMs}"`,
       });
       response.write(value);
       response.end();
@@ -182,6 +200,7 @@ async function sendFileToBrowser(localPath, response, mode, browserCacheTime, co
         'Content-Length': value.byteLength,
         'Cache-Control': `Public, Max-Age=${browserCacheTime}`,
         'Content-Type': contentType,
+        ETag: `W/"${currentStats.size},${currentStats.mtimeMs}"`,
       });
       response.write(value);
       response.end();
@@ -827,16 +846,6 @@ async function onReceiveRequest(request, response) {
     response.write(res);
     response.end();
   } else {
-    if (path.pathname === '/' && path.query) {
-      const query = querystring.parse(path.query);
-      if (!checkBotAuthSignature(query)) {
-        response.writeHead(403, {
-          'Content-Length': 0,
-        });
-        response.end();
-        return;
-      }
-    }
     const sanitaryPath = normalize(path.pathname).replace(pathSanitizer, '');
     let filePathname = join(currentConfig.webserverHomeDirectory, sanitaryPath);
     let {
@@ -846,10 +855,7 @@ async function onReceiveRequest(request, response) {
       ext = '.html';
       filePathname = join(filePathname, 'index.html');
     }
-    let cacheTime = 86400;
-    if (ext === '.html') {
-      cacheTime = 60;
-    }
+    const cacheTime = cacheTimes[ext] || 86400;
     let mode = 'none';
     if (request.headers['accept-encoding']) {
       const acceptedEncoding = request.headers['accept-encoding'];
