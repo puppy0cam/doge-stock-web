@@ -321,12 +321,16 @@ export async function getAllPlayersCount(server, filter) {
 }
 /** @returns {Promise<{id:number;first_name:string;last_name?:string;username?:string;photo_url?:string;}>} */
 export async function getTelegramUserDetails() {
+  const storageKey = localStorage.getItem('telegramUserToken');
+  if (storageKey === null) {
+    return null;
+  }
   if (getTelegramUserDetails.cache) {
     return {
       ...getTelegramUserDetails.cache,
     };
   }
-  getTelegramUserDetails.cache = await sendRequest(`/auth/telegram/check?token=${localStorage.getItem('telegramUserToken')}`);
+  getTelegramUserDetails.cache = await sendRequest(`/auth/telegram/check?token=${storageKey}`);
   return {
     ...getTelegramUserDetails.cache,
   };
