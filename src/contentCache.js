@@ -117,13 +117,19 @@ for (const server of ['eucw', 'ru']) {
   });
   offersWebsocket.connect();
 }
-function sendRequest(url) {
-  return fetch(url).then(sendRequest.toJson);
+async function sendRequest(url) {
+  const response = await fetch(url);
+  // eslint-disable-next-line no-return-await
+  return await sendRequest.toJson(response);
 }
 sendRequest.toJson =
 /** @param {Response} data */
-function toJson(data) {
-  return data.json();
+async function toJson(data) {
+  if (data.status === 200) {
+    // eslint-disable-next-line no-return-await
+    return await data.json();
+  }
+  throw new Error(`Status code ${data.status}`);
 };
 /**
  * @param {"eucw"|"ru"} server
