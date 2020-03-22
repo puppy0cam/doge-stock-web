@@ -144,4 +144,5 @@ export default {
   auth_invalid_description: 'Unfortunately, the data sent was invalid\nWe were unable to validate your identity\nTry pressing the Sign In button again',
   auth_outdated_header: 'Out of Date',
   auth_outdated_description: 'This authentication request is out of date, and can no longer be used to authenticate you.\nPlease press the Sign In button again',
+  logout_btn_txt: 'Logout',
 };

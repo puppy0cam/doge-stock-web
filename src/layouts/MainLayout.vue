@@ -23,8 +23,26 @@
         @click="reconnectWebsocket(ws)"
         >
         </q-btn>
-
-        <div>{{ $t('game_name') }}</div>
+        <q-btn-dropdown v-if="login">
+          <template v-slot:label>
+            <a>{{ login.first_name }}</a>
+            <q-img
+              v-if="login.photo_url"
+              :src="login.photo_url"
+              :alt="`${login.first_name}${login.last_name ? ` ${login.last_name}` : ''}`"
+              :title="`${login.first_name}${login.last_name ? ` ${login.last_name}` : ''}`"
+              width="50px"
+              height="50px"
+            >
+            </q-img>
+          </template>
+          <q-list>
+            <q-item clickable v-close-popup @click="clickLogoutButton">
+              <a>{{ $t('logout_btn_txt') }}</a>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
+        <div v-else>{{ $t('game_name') }}</div>
       </q-toolbar>
     </q-header>
 
@@ -57,7 +75,7 @@
 
 <script>
 import EssentialLink from 'components/EssentialLink';
-import { activeWebsockets } from '../contentCache';
+import { activeWebsockets, getTelegramUserDetails } from '../contentCache';
 
 export default {
   name: 'MainLayout',
@@ -102,9 +120,17 @@ export default {
         },
       ],
       websockets: [],
+      // eslint-disable-next-line max-len
+      /** @type {null | {id:number;first_name:string;last_name?:string;username?:string;photo_url?:string;}} */
+      login: null,
     };
   },
   mounted() {
+    getTelegramUserDetails().then((data) => {
+      this.login = data;
+    }, (error) => {
+      console.warn(error);
+    });
     this.$q.dark.set(true);
     this.updateWebsockets();
     // eslint-disable-next-line no-multi-assign
@@ -127,6 +153,11 @@ export default {
           name: ws.name,
           ws,
         }));
+    },
+    clickLogoutButton() {
+      localStorage.removeItem('telegramUserToken');
+      // eslint-disable-next-line no-restricted-globals
+      location.reload();
     },
   },
 };
