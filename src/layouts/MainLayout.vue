@@ -153,7 +153,7 @@ export default {
         const {
           activeWebsockets,
         } = contentCache;
-        this.websockets = activeWebsockets.filter((ws) => ws.isConnecting || ws.isClosed)
+        this.websockets = activeWebsockets.filter((ws) => ws.isClosed)
           .map((ws) => ({
             isConnecting: ws.isConnecting,
             isClosed: ws.isClosed,
