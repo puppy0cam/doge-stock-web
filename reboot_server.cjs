@@ -50,4 +50,54 @@ if (will_server_need_reboot) {
 } else {
   console.log('Not rebooting webserver');
 }
+try {
+  console.log('Checking if nginx.conf file changed');
+  const newCredentialsFile = readFileSync('./nginx.conf', 'utf8');
+  const oldCredentialsFile = readFileSync('/home/puppy0cam/DogeStock/Web/nginx.conf', 'utf8');
+  if (newCredentialsFile !== oldCredentialsFile) {
+    console.log('nginx.conf changed');
+    copyFileSync('./nginx.conf', '/home/puppy0cam/DogeStock/Web/nginx.conf');
+    will_server_need_reboot = true;
+  } else {
+    console.log('nginx.conf unchanged');
+  }
+} catch (e) {
+  console.log('error while checking credentials file. Will assume reboot is needed');
+  console.warn(e);
+  copyFileSync('./nginx.conf', '/home/puppy0cam/DogeStock/Web/nginx.conf');
+  will_server_need_reboot = true;
+}
+if (will_server_need_reboot) {
+  console.log('Rebooting webserver');
+  execSync('pm2 restart DogeStockWeb', {
+    stdio: 'inherit',
+  });
+} else {
+  console.log('Not rebooting webserver');
+}
+try {
+  console.log('Checking if nginx_locations.conf file changed');
+  const newCredentialsFile = readFileSync('./nginx_locations.conf', 'utf8');
+  const oldCredentialsFile = readFileSync('/home/puppy0cam/DogeStock/Web/nginx_locations.conf', 'utf8');
+  if (newCredentialsFile !== oldCredentialsFile) {
+    console.log('nginx_locations.conf changed');
+    copyFileSync('./nginx_locations.conf', '/home/puppy0cam/DogeStock/Web/nginx_locations.conf');
+    will_server_need_reboot = true;
+  } else {
+    console.log('nginx_locations.conf unchanged');
+  }
+} catch (e) {
+  console.log('error while checking credentials file. Will assume reboot is needed');
+  console.warn(e);
+  copyFileSync('./nginx_locations.conf', '/home/puppy0cam/DogeStock/Web/nginx_locations.conf');
+  will_server_need_reboot = true;
+}
+if (will_server_need_reboot) {
+  console.log('Rebooting webserver');
+  execSync('pm2 restart DogeStockWeb', {
+    stdio: 'inherit',
+  });
+} else {
+  console.log('Not rebooting webserver');
+}
 console.log('Done');
