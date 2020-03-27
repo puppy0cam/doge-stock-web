@@ -38,6 +38,14 @@ jobs:
     - name: Build with Quasar
       run: quasar build
 
+    - name: Run compression algorithms
+      run: |
+        gzip -r9k dist
+        brotli -fZk dist/*.*
+        brotli -fZk dist/*/*.*
+        brotli -fZk dist/*/*/*.*
+        brotli -fZk dist/*/*/*/*.*
+
     - name: Copy Build Result
       run: cp -rf  dist /home/puppy0cam/DogeStock/Web/
 
