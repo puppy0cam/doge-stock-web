@@ -5,7 +5,7 @@ const util = require('util');
 
 const credentialsFile = './credentials.json';
 
-/** @typedef {{httpListeningPort:number;httpsListeningPort:number;httpsCertificateFilePath:string;httpsPrivateKeyFilePath:string;webserverHomeDirectory:string;:servers:{trueName:string;aliases:string[];database:{client:"mysql";connection:{host:string;database:string;multipleStatements:boolean;password:string;user:string;supportBigNumbers:boolean;charset:string;}};publicExchanges:string[];amqp:{hostname:string;password:string;username:string;vhost:string;};}[];}} Config */
+/** @typedef {{httpListeningPort:number;webserverHomeDirectory:string;:servers:{trueName:string;aliases:string[];database:{client:"mysql";connection:{host:string;database:string;multipleStatements:boolean;password:string;user:string;supportBigNumbers:boolean;charset:string;}};}[];}} Config */
 
 module.exports.getConfig =
 /**
@@ -17,9 +17,6 @@ function getConfig(onConfigReloaded) {
     /** @type {Config} */
     let currentConfig = {
       httpListeningPort: NaN,
-      httpsCertificateFilePath: '/dev/null',
-      httpsListeningPort: NaN,
-      httpsPrivateKeyFilePath: '/dev/null',
       servers: [],
       webserverHomeDirectory: '/dev/null',
     };
@@ -31,11 +28,11 @@ function getConfig(onConfigReloaded) {
     } catch {
       reject(new Error('Credentials file either does not exist or is not a file'));
     }
-    const watch = fs.watch('./credentials.json', {
+    fs.watch('./credentials.json', {
       encoding: 'utf8',
       persistent: false,
       recursive: false,
-    }, (event, filename) => {
+    }, (event) => {
       if (event === 'change') {
         const oldPend = pendingReload;
         pendingReload = new Promise((resolve) => {
@@ -58,12 +55,6 @@ function getConfig(onConfigReloaded) {
         const config = await JSON.parse(data);
         if (typeof config.httpListeningPort !== 'number') {
           throw new TypeError('httpListeningPort must be a number');
-        } else if (typeof config.httpsCertificateFilePath !== 'string') {
-          throw new TypeError('httpsCertificateFilePath must be a string');
-        } else if (typeof config.httpsListeningPort !== 'number') {
-          throw new TypeError('httpsListeningPort must be a number');
-        } else if (typeof config.httpsPrivateKeyFilePath !== 'string') {
-          throw new TypeError('httpsPrivateKeyFilePath must be a string');
         } else if (typeof config.webserverHomeDirectory !== 'string') {
           throw new TypeError('webserverHomeDirectory must be a string');
         } else if (!Array.isArray(config.servers)) {
@@ -72,16 +63,6 @@ function getConfig(onConfigReloaded) {
           for (const server of config.servers) {
             if (!Array.isArray(server.aliases)) {
               throw new TypeError('servers[item].aliases must be an array');
-            } else if (typeof server.amqp !== 'object' || server.amqp === null) {
-              throw new TypeError('servers[item].amqp must be an object');
-            } else if (typeof server.amqp.hostname !== 'string') {
-              throw new TypeError('servers[item].amqp.hostname must be a string');
-            } else if (typeof server.amqp.password !== 'string') {
-              throw new TypeError('servers[item].amqp.password must be a string');
-            } else if (typeof server.amqp.username !== 'string') {
-              throw new TypeError('servers[item].amqp.username must be a string');
-            } else if (typeof server.amqp.vhost !== 'string') {
-              throw new TypeError('servers[item].amqp.vhost must be a string');
             } else if (typeof server.database !== 'object' || server.database === null) {
               throw new TypeError('servers[item].database must be an object');
             } else if (typeof server.database.client !== 'string') {
@@ -102,18 +83,11 @@ function getConfig(onConfigReloaded) {
               throw new TypeError('servers[item].database.connection.supportBigNumbers must be a boolean');
             } else if (typeof server.database.connection.charset !== 'string') {
               throw new TypeError('servers[item].database.connection.charset must be a string');
-            } else if (!Array.isArray(server.publicExchanges)) {
-              throw new TypeError('servers[item].publicExchanges must be an array');
             } else if (typeof server.trueName !== 'string') {
               throw new TypeError('servers[item].trueName must be a string');
             } else if (typeof server.botToken !== 'string') {
               throw new TypeError('servers[item].botToken must be a string');
             } else {
-              for (const i of server.publicExchanges) {
-                if (typeof i !== 'string') {
-                  throw new TypeError('servers[item].publicExchanges[item] must be a string');
-                }
-              }
               for (const i of server.aliases) {
                 if (typeof i !== 'string') {
                   throw new TypeError('servers[item].aliases[item] must be a string');

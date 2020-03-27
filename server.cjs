@@ -6,38 +6,13 @@
 /* eslint-disable strict */
 const uuid = require('uuid').v4;
 const {
-  connect: amqpConnect,
-} = require('amqplib');
-const {
-  Server: WebSocketServer,
-} = require('ws');
-const {
   createServer,
 } = require('http');
 const {
   parse,
 } = require('url');
-const {
-  watchFile,
-  promises: {
-    stat,
-    readFile,
-  },
-} = require('fs');
-const {
-  gzip,
-} = require('zlib');
-const {
-  normalize,
-  join,
-  parse: parsePath,
-} = require('path');
-const httpsModule = require('https');
 const querystring = require('querystring');
 const knexModule = require('knex');
-const {
-  isDeepStrictEqual,
-} = require('util');
 const {
   createHash,
   createHmac,
@@ -48,46 +23,9 @@ const {
 } = require('./credentials.cjs');
 
 const playerIdRegex = /^[abcdefghijklmnopqrstuvwxyz0123456789-]+$/;
-const pathSanitizer = /^(\.\.[/\\])+/;
-const mimeType = {
-  '.ico': 'image/x-icon',
-  '.html': 'text/html',
-  '.js': 'text/javascript',
-  '.json': 'application/json',
-  '.css': 'text/css',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.wav': 'audio/wav',
-  '.mp3': 'audio/mpeg',
-  '.svg': 'image/svg+xml',
-  '.pdf': 'application/pdf',
-  '.zip': 'application/zip',
-  '.doc': 'application/msword',
-  '.eot': 'application/vnd.ms-fontobject',
-  '.ttf': 'application/x-font-ttf',
-};
-const cacheTimes = {
-  '.ico': 31557600,
-  '.html': 2419200,
-  '.js': 2419200,
-  '.json': 2419200,
-  '.css': 2419200,
-  '.png': 2419200,
-  '.jpg': 2419200,
-  '.wav': 2419200,
-  '.mp3': 2419200,
-  '.svg': 2419200,
-  '.pdf': 2419200,
-  '.zip': 2419200,
-  '.doc': 2419200,
-  '.eot': 2419200,
-  '.ttf': 2419200,
-};
 // eslint-disable-next-line max-len
 /** @type {Map<string, {id:string;first_name:string;last_name:string;username:string;photo_url:string;auth_date:string;hash:string;}>} */
 const verifiedUserAuthentications = new Map();
-/** @type {{server:import('ws').Server;path:string;}[]} */
-const websockets = [];
 /** @type {import('./credentials').Config} */
 let currentConfig = null;
 const configKnexInstances = new WeakMap();
@@ -113,107 +51,6 @@ function getKnexInstanceForServer(server) {
 const spaiPlayerAllListCache = new WeakMap();
 /** @type {WeakMap<import('knex'), {expires:number;data:Buffer;}} */
 const spaiGuildAllListCache = new WeakMap();
-// eslint-disable-next-line max-len
-/** @type {Map<string, {stats:import('fs').Stats;uncompressedCache:Promise<Buffer>;gzipCompressedCache:Promise<Buffer>;}>} */
-const fileSystemCache = new Map();
-/**
- * @param {string} localPath
- * @param {import('http').ServerResponse} response
- * @param {"gzip"|"none"} mode
- * @param {number} browserCacheTime how many seconds the browser can hold on to this in the cache.
- * @param {string} contentType
- */
-async function sendFileToBrowser(localPath, response, mode, browserCacheTime, contentType) {
-  'use strict';
-
-  /** @type {import('fs').Stats} */
-  let currentStats;
-  try {
-    currentStats = await stat(localPath);
-  } catch {
-    response.writeHead(404, {
-      'Content-Length': 0,
-    });
-    response.end();
-    return;
-  }
-  if (!currentStats.isFile()) {
-    response.writeHead(404, {
-      'Content-Length': 0,
-    });
-    response.end();
-    return;
-  }
-  let willCacheHit = false;
-  if (fileSystemCache.has(localPath)) {
-    const cache = fileSystemCache.get(localPath);
-    if (isDeepStrictEqual(cache.stats, currentStats)) {
-      willCacheHit = true;
-    }
-  }
-  if (!willCacheHit) {
-    console.debug('Cache was missed for %s', localPath);
-    const fileRead = readFile(localPath);
-    const cacheResult = {
-      stats: currentStats,
-      uncompressedCache: fileRead,
-      gzipCompressedCache: new Promise((resolve, reject) => {
-        'use strict';
-
-        fileRead.then((content) => {
-          'use strict';
-
-          gzip(content, (error, result) => {
-            'use strict';
-
-            if (error) {
-              reject(error);
-            } else {
-              resolve(result);
-            }
-          });
-        }, reject);
-      }),
-    };
-    fileSystemCache.set(localPath, cacheResult);
-  }
-  const hitCache = fileSystemCache.get(localPath);
-  if (mode === 'gzip') {
-    hitCache.gzipCompressedCache.then((value) => {
-      'use strict';
-
-      response.writeHead(200, {
-        'Content-Length': value.byteLength,
-        'Cache-Control': `Public, Max-Age=${browserCacheTime}`,
-        'Content-Type': contentType,
-        'Content-Encoding': 'gzip',
-        ETag: `W/"${currentStats.size},${currentStats.mtimeMs}"`,
-        Expires: new Date(Date.now() + (browserCacheTime * 1000)).toUTCString(),
-      });
-      response.write(value);
-      response.end();
-    });
-  } else if (mode === 'none') {
-    hitCache.uncompressedCache.then((value) => {
-      'use strict';
-
-      response.writeHead(200, {
-        'Content-Length': value.byteLength,
-        'Cache-Control': `Public, Max-Age=${browserCacheTime}`,
-        'Content-Type': contentType,
-        ETag: `W/"${currentStats.size},${currentStats.mtimeMs}"`,
-        Expires: new Date(Date.now() + (browserCacheTime * 1000)).toUTCString(),
-      });
-      response.write(value);
-      response.end();
-    });
-  } else {
-    response.writeHead(500, {
-      'Content-Length': 0,
-    });
-    response.end();
-  }
-}
 /** @type {WeakMap<import('./credentials').Config, Buffer[]>} */
 const tokenHashes = new WeakMap();
 
@@ -847,57 +684,7 @@ async function onReceiveRequest(request, response) {
     });
     response.write(res);
     response.end();
-  } else {
-    const sanitaryPath = normalize(path.pathname).replace(pathSanitizer, '');
-    let filePathname = join(currentConfig.webserverHomeDirectory, sanitaryPath);
-    let {
-      ext,
-    } = parsePath(filePathname);
-    if (!ext) {
-      ext = '.html';
-      filePathname = join(filePathname, 'index.html');
-    }
-    const cacheTime = cacheTimes[ext] || 86400;
-    let mode = 'none';
-    if (request.headers['accept-encoding']) {
-      const acceptedEncoding = request.headers['accept-encoding'];
-      const encodings = acceptedEncoding.split(', ');
-      if (encodings.includes('gzip')) {
-        mode = 'gzip';
-      }
-    }
-    try {
-      await sendFileToBrowser(filePathname, response, mode, cacheTime, mimeType[ext] || 'text/plain');
-    } catch {
-      response.writeHead(500, {
-        'Content-Length': 0,
-      });
-      response.end();
-      return;
-    }
   }
-}
-function onServerUpgrade(request, socket, head) {
-  'use strict';
-
-  const {
-    pathname,
-  } = parse(request.url);
-  for (let i = 0; i < websockets.length; i++) {
-    const {
-      path,
-      server: webSocketServer,
-    } = websockets[i];
-    if (path.toLowerCase() === pathname.toLowerCase()) {
-      webSocketServer.handleUpgrade(request, socket, head, (client) => {
-        'use strict';
-
-        webSocketServer.emit('connection', client, request);
-      });
-      return;
-    }
-  }
-  socket.end();
 }
 (async () => {
   'use strict';
@@ -940,130 +727,10 @@ function onServerUpgrade(request, socket, head) {
         if (!httpServer) {
           httpServer = createServer({
           }, onReceiveRequest);
-          httpServer.on('upgrade', onServerUpgrade);
         }
         httpServer.listen(currentConfig.httpListeningPort, '0.0.0.0', resolve);
       }, reject);
     });
-  }
-
-  /** @type {import('https').Server | null} */
-  let httpsServer = null;
-  /** @returns {Promise<void>} */
-  function closeHttpsServer() {
-    'use strict';
-
-    return new Promise((resolve, reject) => {
-      'use strict';
-
-      if (httpsServer) {
-        httpsServer.close((error) => {
-          'use strict';
-
-          if (error) {
-            reject(error);
-          } else {
-            resolve();
-          }
-        });
-      } else {
-        resolve();
-      }
-    });
-  }
-
-  /**
-   * @returns {Promise<void>}
-   * @param {boolean=} forceCertificateChange
-   */
-  function reloadHttpsServer(forceCertificateChange) {
-    'use strict';
-
-    forceCertificateChange = forceCertificateChange || false;
-    return new Promise((resolve, reject) => {
-      'use strict';
-
-      closeHttpsServer().then(() => {
-        'use strict';
-
-        if (!httpsServer || forceCertificateChange) {
-          Promise.all([
-            readFile(currentConfig.httpsCertificateFilePath),
-            readFile(currentConfig.httpsPrivateKeyFilePath),
-          ]).then((files) => {
-            'use strict';
-
-            const [cert, key] = files;
-
-            httpsServer = httpsModule.createServer({
-              cert,
-              key,
-            }, onReceiveRequest);
-            httpsServer.on('upgrade', onServerUpgrade);
-            httpsServer.listen(currentConfig.httpsListeningPort, '0.0.0.0', resolve);
-          }, reject);
-        } else {
-          httpsServer.listen(currentConfig.httpsListeningPort, '0.0.0.0', resolve);
-        }
-      }, reject);
-    });
-  }
-
-  async function reloadWebsockets() {
-    'use strict';
-
-    while (websockets.length) {
-      websockets.pop();
-    }
-    for (const serverConfig of currentConfig.servers) {
-      const connection = amqpConnect(serverConfig.amqp);
-      for (const publicExchange of serverConfig.publicExchanges) {
-        const ws = new WebSocketServer({
-          clientTracking: true,
-          noServer: true,
-          perMessageDeflate: false,
-        });
-        for (const i of [serverConfig.trueName, ...serverConfig.aliases]) {
-          websockets.push({
-            path: `/${i}/${publicExchange}`,
-            server: ws,
-          });
-        }
-        connection.then((conn) => {
-          'use strict';
-
-          conn.createChannel().then((channel) => {
-            'use strict';
-
-            channel.assertQueue(null, {
-              autoDelete: true,
-              durable: false,
-              exclusive: true,
-            }).then((queueInfo) => {
-              'use strict';
-
-              Promise.all([
-                channel.bindQueue(queueInfo.queue, 'API', publicExchange),
-                channel.consume(queueInfo.queue, (msg) => {
-                  'use strict';
-
-                  ws.clients.forEach((client) => {
-                    'use strict';
-
-                    client.send(msg.content);
-                  });
-                }, {
-                  exclusive: true,
-                  noAck: true,
-                }),
-              ]).then(() => {
-                'use strict';
-              });
-            });
-          });
-        });
-      }
-    }
   }
 
   currentConfig = await getConfig(async (newConfig) => {
@@ -1075,31 +742,9 @@ function onServerUpgrade(request, socket, head) {
       console.log('Reloading http server');
       reloadHttpServer();
     }
-    if (newConfig.httpsListeningPort !== oldConfig.httpsListeningPort) {
-      console.log('Reloading https server');
-      reloadHttpsServer();
-    }
-    if (!isDeepStrictEqual(newConfig.servers, oldConfig.servers)) {
-      console.log('Reloading websockets');
-      reloadWebsockets();
-    }
-  });
-
-  watchFile(currentConfig.httpsCertificateFilePath, {
-    interval: 60000,
-    persistent: false,
-  }, (current, previous) => {
-    'use strict';
-
-    if (!isDeepStrictEqual(current, previous)) {
-      console.log('reloading https server');
-      reloadHttpsServer(true);
-    }
   });
 
   await Promise.all([
     reloadHttpServer(),
-    reloadHttpsServer(),
-    reloadWebsockets(),
   ]);
 })();
