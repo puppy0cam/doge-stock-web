@@ -90,6 +90,15 @@ async function getUserToken(server, userId) {
         setTimeout(() => cache.delete(userId), 60000);
         return value;
       }
+      const serverChannel = amqpChannels.get(configServer);
+      if (serverChannel) {
+        serverChannel.publish(configServer.gameAmqpExchange, configServer.gameAmqpExchangeRoutingKey, Buffer.from(JSON.stringify({
+          action: 'createAuthCode',
+          payload: {
+            userId,
+          },
+        })));
+      }
       throw new Error('No token');
     }
   }
