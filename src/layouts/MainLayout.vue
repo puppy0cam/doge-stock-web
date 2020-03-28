@@ -136,6 +136,7 @@ export default {
         ws.addEventListener('open', forceUpdate);
         ws.addEventListener('close', forceUpdate);
       }
+      this.updateWebsockets();
       getTelegramUserDetails().then((data) => {
         this.login = data;
       }, (error) => {
