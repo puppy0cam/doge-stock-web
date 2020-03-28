@@ -154,4 +154,5 @@ export default {
   deals_table_option_view_selling_player: 'View Seller',
   deals_table_option_view_buying_player: 'View Buyer',
   player_history_table_view_guild: 'View Guild',
+  offers_table_option_purchase_item: 'Purchase item',
 };
