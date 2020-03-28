@@ -784,7 +784,7 @@ async function onReceiveRequest(request, response) {
           const channel = amqpChannels.get(configServer);
           if (channel) {
             if (token.TradeTerminal) {
-              channel.publish(configServer.gameAmqpExchange, configServer.gameAmqpRoutingKey, Buffer.from(JSON.stringify({
+              channel.publish(configServer.gameAmqpExchange, configServer.gameAmqpExchangeRoutingKey, Buffer.from(JSON.stringify({
                 token: token.token,
                 action: 'wantToBuy',
                 payload: {
