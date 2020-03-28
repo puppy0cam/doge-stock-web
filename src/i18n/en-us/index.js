@@ -146,4 +146,6 @@ export default {
   auth_outdated_description: 'This authentication request is out of date, and can no longer be used to authenticate you.\nPlease press the Sign In button again',
   logout_btn_txt: 'Logout',
   offers_table_option_view_selling_player: 'View Seller',
+  duels_table_option_view_winning_player: 'View Winner',
+  duels_table_option_view_losing_player: 'View Loser',
 };

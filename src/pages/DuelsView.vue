@@ -16,6 +16,21 @@
         </template>
       </q-input>
     </template>
+    <template v-slot:body="props">
+      <q-tr :props="props">
+        <q-td :props="props" v-for="key in props.cols" :key="key.name">
+          {{ key.value }}
+        </q-td>
+        <q-menu touch-position>
+          <q-item clickable @click="viewFightWinner($event, props.row)">
+            <q-item-section>{{ $t('duels_table_option_view_winning_player') }}</q-item-section>
+          </q-item>
+          <q-item clickable @click="viewFightLoser($event, props.row)">
+            <q-item-section>{{ $t('duels_table_option_view_losing_player') }}</q-item-section>
+          </q-item>
+        </q-menu>
+      </q-tr>
+    </template>
   </q-table>
 </q-page>
 </template>
@@ -127,6 +142,14 @@ export default {
       } = contentCache;
       this.duels = duels;
     });
+  },
+  methods: {
+    viewFightWinner(event, row) {
+      this.$router.push(`/playerhistory/${row.server}/${row.data.winner.id}`);
+    },
+    viewFightLoser(event, row) {
+      this.$router.push(`/playerhistory/${row.server}/${row.data.loser.id}`);
+    },
   },
 };
 
