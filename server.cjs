@@ -925,5 +925,6 @@ async function onReceiveRequest(request, response) {
 
   await Promise.all([
     reloadHttpServer(),
+    reloadGameAmqp(),
   ]);
 })();
