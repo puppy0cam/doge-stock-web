@@ -32,7 +32,7 @@
             <q-item-section>{{ $t('offers_table_option_view_selling_player') }}</q-item-section>
           </q-item>
           <q-item
-          v-if="authorised && getItemCode(props.row.item)"
+          v-if="authorised && getItemCode(props.row.data.item)"
           clickable
           @click="purchaseItem($event, props.row)">
             <q-item-section>{{ $t('offers_table_option_purchase_item') }}</q-item-section>
@@ -90,6 +90,7 @@ export default {
           field: (row) => row.data.price,
         },
       ],
+      authorised: false,
     };
   },
   mounted() {
