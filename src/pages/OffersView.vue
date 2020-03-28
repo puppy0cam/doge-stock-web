@@ -198,6 +198,10 @@ export default {
         case 'Vial of Morph': return 'p19';
         case 'Potion of Morph': return 'p20';
         case 'Bottle of Morph': return 'p21';
+        case 'Hay': return '618';
+        case 'Corn': return '619';
+        case 'Hamsters': return '620';
+        case 'Cheese': return '621';
         default: return '';
       }
     },
