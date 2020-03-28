@@ -152,4 +152,5 @@ export default {
   duels_table_option_view_losing_guild: 'View Loser\'s guild',
   deals_table_option_view_selling_player: 'View Seller',
   deals_table_option_view_buying_player: 'View Buyer',
+  player_history_table_view_guild: 'View Guild',
 };

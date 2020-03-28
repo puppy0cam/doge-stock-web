@@ -15,6 +15,18 @@
         </template>
       </q-input>
     </template>
+    <template v-slot:body="props">
+      <q-tr :props="props">
+        <q-td :props="props" v-for="key in props.cols" :key="key.name">
+          {{ key.value }}
+        </q-td>
+        <q-menu v-if="props.row.guild_tag" touch-position>
+          <q-item v-if="props.row.guild_tag" clickable @click="viewPlayerGuild($event, props.row)">
+            <q-item-section>{{ $t('player_history_table_view_guild') }}</q-item-section>
+          </q-item>
+        </q-menu>
+      </q-tr>
+    </template>
   </q-table>
 </q-page>
 </template>
@@ -85,6 +97,11 @@ export default {
         console.error(error);
       });
     });
+  },
+  methods: {
+    viewPlayerGuild(event, row) {
+      this.$router.push(`/guildmembers/${this.server}/${row.guild_tag}`);
+    },
   },
   props: {
     server: {
