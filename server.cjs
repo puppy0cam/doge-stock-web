@@ -83,6 +83,7 @@ function checkBotAuthSignature(data) {
 }
 async function onReceiveRequest(request, response) {
   'use strict';
+
   if (request.method.toUpperCase() !== 'GET') {
     response.writeHead(405, {
       'Content-Length': 0,
