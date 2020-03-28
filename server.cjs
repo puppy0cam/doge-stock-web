@@ -684,6 +684,13 @@ async function onReceiveRequest(request, response) {
     });
     response.write(res);
     response.end();
+  } else {
+    response.writeHead(404, {
+      'Content-Length': 145,
+      'Content-Type': 'application/json',
+    });
+    response.write('{"ok":false,"reason":"Your request could not be served from the file system, and the server does not know of any methods that match this query."}');
+    response.end();
   }
 }
 (async () => {
