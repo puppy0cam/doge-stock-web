@@ -22,6 +22,18 @@
         </template>
       </q-input>
     </template>
+    <template v-slot:body="props">
+      <q-tr :props="props">
+        <q-td :props="props" v-for="key in props.cols" :key="key.name">
+          {{ key.value }}
+        </q-td>
+        <q-menu touch-position>
+          <q-item clickable @click="clickOfferRow($event, props.row)">
+            <q-item-section>{{ $t('offers_table_option_view_selling_player') }}</q-item-section>
+          </q-item>
+        </q-menu>
+      </q-tr>
+    </template>
   </q-table>
 </q-page>
 </template>

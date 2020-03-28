@@ -145,4 +145,5 @@ export default {
   auth_outdated_header: 'Out of Date',
   auth_outdated_description: 'This authentication request is out of date, and can no longer be used to authenticate you.\nPlease press the Sign In button again',
   logout_btn_txt: 'Logout',
+  offers_table_option_view_selling_player: 'View Seller',
 };
