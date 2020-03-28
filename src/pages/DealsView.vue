@@ -14,6 +14,21 @@
         </template>
       </q-input>
     </template>
+    <template v-slot:body="props">
+      <q-tr :props="props">
+        <q-td :props="props" v-for="key in props.cols" :key="key.name">
+          {{ key.value }}
+        </q-td>
+        <q-menu touch-position>
+          <q-item clickable @click="viewSeller($event, props.row)">
+            <q-item-section>{{ $t('deals_table_option_view_selling_player') }}</q-item-section>
+          </q-item>
+          <q-item clickable @click="viewBuyer($event, props.row)">
+            <q-item-section>{{ $t('deals_table_option_view_buying_player') }}</q-item-section>
+          </q-item>
+        </q-menu>
+      </q-tr>
+    </template>
   </q-table>
 </q-page>
 </template>
@@ -88,6 +103,14 @@ export default {
       } = contentCache;
       this.deals = deals;
     });
+  },
+  methods: {
+    viewSeller(event, row) {
+      this.$router.push(`/playerhistory/${row.server}/${row.data.sellerId}`);
+    },
+    viewBuyer(event, row) {
+      this.$router.push(`/playerhistory/${row.server}/${row.data.buyerId}`);
+    },
   },
 };
 
