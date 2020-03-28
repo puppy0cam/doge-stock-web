@@ -25,8 +25,20 @@
           <q-item clickable @click="viewFightWinner($event, props.row)">
             <q-item-section>{{ $t('duels_table_option_view_winning_player') }}</q-item-section>
           </q-item>
+          <q-item
+          v-if="props.row.winner.tag"
+          clickable
+          @click="viewFightWinnerGuild($event, props.row)">
+            <q-item-section>{{ $t('duels_table_option_view_winning_guild') }}</q-item-section>
+          </q-item>
           <q-item clickable @click="viewFightLoser($event, props.row)">
             <q-item-section>{{ $t('duels_table_option_view_losing_player') }}</q-item-section>
+          </q-item>
+          <q-item
+          v-if="props.row.loser.tag"
+          clickable
+          @click="viewFightLoserGuild($event, props.row)">
+            <q-item-section>{{ $t('duels_table_option_view_losing_guild') }}</q-item-section>
           </q-item>
         </q-menu>
       </q-tr>
@@ -147,8 +159,14 @@ export default {
     viewFightWinner(event, row) {
       this.$router.push(`/playerhistory/${row.server}/${row.data.winner.id}`);
     },
+    viewFightWinnerGuild(event, row) {
+      this.$router.push(`/guildmembers/${row.server}/${row.data.winner.tag}`);
+    },
     viewFightLoser(event, row) {
       this.$router.push(`/playerhistory/${row.server}/${row.data.loser.id}`);
+    },
+    viewFightLoserGuild(event, row) {
+      this.$router.push(`/guildmembers/${row.server}/${row.data.loser.tag}`);
     },
   },
 };

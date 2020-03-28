@@ -148,4 +148,6 @@ export default {
   offers_table_option_view_selling_player: 'View Seller',
   duels_table_option_view_winning_player: 'View Winner',
   duels_table_option_view_losing_player: 'View Loser',
+  duels_table_option_view_winning_guild: 'View Winner\'s guild',
+  duels_table_option_view_losing_guild: 'View Loser\'s guild',
 };
