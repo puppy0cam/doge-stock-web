@@ -1,3 +1,5 @@
+/* eslint-disable max-len */
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-globals */
 /* eslint-disable no-labels */
 /* eslint-disable no-useless-return */
@@ -8,6 +10,9 @@ const uuid = require('uuid').v4;
 const {
   createServer,
 } = require('http');
+const {
+  connect,
+} = require('amqplib');
 const {
   parse,
 } = require('url');
@@ -47,12 +52,49 @@ function getKnexInstanceForServer(server) {
   }
   throw new Error('Server not found');
 }
+// eslint-disable-next-line max-len
+/** @type {WeakMap<import('./credentials').Config['servers'][0], import('amqplib').Channel | null>} */
+const amqpChannels = new Map();
 /** @type {WeakMap<import('knex'), {expires:number;data:Buffer;}} */
 const spaiPlayerAllListCache = new WeakMap();
 /** @type {WeakMap<import('knex'), {expires:number;data:Buffer;}} */
 const spaiGuildAllListCache = new WeakMap();
 /** @type {WeakMap<import('./credentials').Config, Buffer[]>} */
 const tokenHashes = new WeakMap();
+// eslint-disable-next-line max-len
+/** @type {WeakMap<import('./credentials').Config['servers'][0], Map<number,{userId:number;ingameId:string;account:string;server:string;token:string;defaults:boolean;TradeTerminal:boolean;GetUserProfile:boolean;GetStock:boolean;ViewCraftbook:boolean;currentQuery:string;addingPermission:string;revoked:boolean;}>>} */
+const gameTokenCache = new WeakMap();
+/**
+ * @returns {Promise<{userId:number;ingameId:string;account:string;server:string;token:string;defaults:boolean;TradeTerminal:boolean;GetUserProfile:boolean;GetStock:boolean;ViewCraftbook:boolean;currentQuery:string;addingPermission:string;revoked:boolean;}>}
+ * @param {string} server
+ * @param {number} userId
+ */
+async function getUserToken(server, userId) {
+  for (const configServer of currentConfig.servers) {
+    if (server === configServer.trueName || configServer.aliases.includes(server)) {
+      let cache = gameTokenCache.get(configServer);
+      if (cache) {
+        const cachedValue = cache.get(userId);
+        if (cachedValue) {
+          return cachedValue;
+        }
+      } else {
+        cache = new Map();
+        gameTokenCache.set(configServer, cache);
+      }
+      const knex = getKnexInstanceForServer(server);
+      const result = await knex('user_tokens').where('userId', userId).andWhere('revoked', false);
+      const value = result[result.length - 1];
+      if (value) {
+        cache.set(userId, value);
+        setTimeout(() => cache.delete(userId), 60000);
+        return value;
+      }
+      throw new Error('No token');
+    }
+  }
+  throw new Error('Invalid server');
+}
 
 function checkBotAuthSignature(data) {
   if (!tokenHashes.has(currentConfig)) {
@@ -84,12 +126,12 @@ function checkBotAuthSignature(data) {
 async function onReceiveRequest(request, response) {
   'use strict';
 
-  if (request.method.toUpperCase() !== 'GET') {
+  if (request.method.toUpperCase() !== 'GET' && request.method.toUpperCase() !== 'POST') {
     response.writeHead(405, {
       'Content-Length': 70,
       'Content-Type': 'application/json',
     });
-    response.write('{"ok":false,"reason":"Your request must be made within a GET request"}');
+    response.write('{"ok":false,"reason":"Your request must be made within a GET request, or if using a POST request with the entire query within the url"}');
     response.end();
     return;
   }
@@ -683,6 +725,121 @@ async function onReceiveRequest(request, response) {
     });
     response.write(res);
     response.end();
+  } else if (path.pathname === '/exchange/wtb') {
+    /** @type {{id:string;first_name:string;last_name:string;username:string;photo_url:string;auth_date:string;hash:string;}} */
+    let authorisation;
+    if (params.token) {
+      authorisation = verifiedUserAuthentications.get(params.token);
+      if (!authorisation) {
+        response.writeHead(401, {
+          'Content-Length': 64,
+          'Content-Type': 'application/json',
+        });
+        response.write('{"ok":false,"reason":"This web authorisation token has expired"}');
+        response.end();
+        return;
+      }
+    } else {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (!params.server) {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (!params.itemCode) {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (!params.quantity || !isFinite(Number(params.quantity))) {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (!params.quantity || !isFinite(Number(params.price))) {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
+    }
+    if (params.exactPrice !== 'true' && params.exactPrice !== 'false') {
+      params.exactPrice = 'false';
+    }
+    try {
+      const token = await getUserToken(params.server, Number(authorisation.id));
+      for (const configServer of currentConfig.servers) {
+        if (configServer.trueName === params.server || configServer.aliases.includes(params.server)) {
+          const channel = amqpChannels.get(configServer);
+          if (channel) {
+            if (token.TradeTerminal) {
+              channel.publish(configServer.gameAmqpExchange, configServer.gameAmqpRoutingKey, Buffer.from(JSON.stringify({
+                token: token.token,
+                action: 'wantToBuy',
+                payload: {
+                  itemCode: params.itemCode,
+                  quantity: Number(params.quantity),
+                  price: Number(params.price),
+                  exactPrice: params.exactPrice === 'true',
+                },
+              })));
+              response.writeHead(200, {
+                'Content-Length': 11,
+                'Content-Type': 'application/json',
+                'Cache-Control': 'No-Store',
+              });
+              response.write('{"ok":true}');
+              response.end();
+              return;
+            }
+            response.writeHead(403, {
+              'Content-Length': 58,
+              'Content-Type': 'application/json',
+              'Cache-Control': 'No-Store',
+            });
+            response.write('{"ok":false,"reason":"This token lacks the needed scopes"}');
+            response.end();
+            return;
+          }
+          response.writeHead(503, {
+            'Content-Length': 86,
+            'Content-Type': 'application/json',
+            'Cache-Control': 'No-Store',
+          });
+          response.write('{"ok":false,"reason":"I am not yet connected to the game API. Please try again later"}');
+          response.end();
+          return;
+        }
+      }
+      response.writeHead(404, {
+        'Content-Length': 40,
+        'Cache-Control': 'No-Store',
+      });
+      response.write('{"ok":false,"reason":"Server not found"}');
+      response.end();
+      return;
+    } catch (e) {
+      console.warn('[WTB]: ', e, params);
+      response.writeHead(500, {
+        'Content-Length': 159,
+        'Content-Type': 'application/json',
+        'Cache-Control': 'No-Store',
+      });
+      response.write('{"ok":false,"reason":"The request was likely invalid in some way, or I encountered an error. If this continues, please notify me. This error has been logged."}');
+      response.end();
+      return;
+    }
   } else {
     response.writeHead(404, {
       'Content-Length': 145,
@@ -738,6 +895,15 @@ async function onReceiveRequest(request, response) {
       }, reject);
     });
   }
+  async function reloadGameAmqp() {
+    'use strict';
+
+    for (const server of currentConfig.servers) {
+      const connection = await connect(server.gameAmqp);
+      const channel = await connection.createChannel();
+      amqpChannels.set(server, channel);
+    }
+  }
 
   currentConfig = await getConfig(async (newConfig) => {
     'use strict';
@@ -748,6 +914,13 @@ async function onReceiveRequest(request, response) {
       console.log('Reloading http server');
       reloadHttpServer();
     }
+    for (const server of oldConfig.servers) {
+      if (amqpChannels.has(server)) {
+        const channel = amqpChannels.get(server);
+        channel.close();
+      }
+    }
+    reloadGameAmqp();
   });
 
   await Promise.all([
