@@ -803,6 +803,13 @@ async function onReceiveRequest(request, response) {
               response.end();
               return;
             }
+            channel.publish(configServer.gameAmqpExchange, configServer.gameAmqpExchangeRoutingKey, Buffer.from(JSON.stringify({
+              token: token.token,
+              action: 'authAdditionalOperation',
+              payload: {
+                operation: 'TradeTerminal',
+              },
+            })));
             response.writeHead(403, {
               'Content-Length': 58,
               'Content-Type': 'application/json',
