@@ -767,7 +767,7 @@ async function onReceiveRequest(request, response) {
       response.end();
       return;
     }
-    if (!params.quantity || !isFinite(Number(params.price))) {
+    if (!params.price || !isFinite(Number(params.price))) {
       response.writeHead(400, {
         'Content-Length': 0,
       });
