@@ -22,6 +22,7 @@ Your browser may also cache some requests for a period
  - /spai/player/all?server
  - /spai/player/count?server&filter
  - /spai/player/all/smart?server&startRow&fetchCount&filter&sortBy
+ - /exchange/wtb?token&itemCode&server&quantity&price&exactPrice
 
 The \`server\` parameter expects that you specify "eucw" or "ru". Some aliases are accepted, but not guarunteed.
 Other fields depend on the circumstances, and I grant no guaruntee of it being successful.

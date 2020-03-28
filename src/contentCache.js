@@ -336,3 +336,13 @@ export async function getTelegramUserDetails() {
     ...getTelegramUserDetails.cache,
   };
 }
+/**
+ * @param {string} server
+ * @param {string} itemCode
+ * @param {number} quantity
+ * @param {number} price
+ * @param {boolean=} exactPrice
+ */
+export async function wantToBuy(server, itemCode, quantity, price, exactPrice) {
+  return sendRequest(`/exchange/wtb?server=${server}&token=${localStorage.getItem('telegramUserToken')}&itemCode=${itemCode}&quantity=${quantity}&price=${price}&exactPrice=${Boolean(exactPrice)}`);
+}
