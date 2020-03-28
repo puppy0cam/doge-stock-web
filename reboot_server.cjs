@@ -42,14 +42,6 @@ try {
   copyFileSync('./credentials.cjs', '/home/puppy0cam/DogeStock/Web/credentials.cjs');
   will_server_need_reboot = true;
 }
-if (will_server_need_reboot) {
-  console.log('Rebooting webserver');
-  execSync('pm2 restart DogeStockWeb', {
-    stdio: 'inherit',
-  });
-} else {
-  console.log('Not rebooting webserver');
-}
 try {
   console.log('Checking if nginx.conf file changed');
   const newCredentialsFile = readFileSync('./nginx.conf', 'utf8');
@@ -66,14 +58,6 @@ try {
   console.warn(e);
   copyFileSync('./nginx.conf', '/home/puppy0cam/DogeStock/Web/nginx.conf');
   will_server_need_reboot = true;
-}
-if (will_server_need_reboot) {
-  console.log('Rebooting webserver');
-  execSync('pm2 restart DogeStockWeb', {
-    stdio: 'inherit',
-  });
-} else {
-  console.log('Not rebooting webserver');
 }
 try {
   console.log('Checking if nginx_locations.conf file changed');
