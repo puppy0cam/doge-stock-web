@@ -34,6 +34,7 @@ class ActiveWebsocket extends EventTarget {
     // eslint-disable-next-line no-multi-assign
     const ws = this.ws = new WebSocket(this.url);
     this.isConnecting = true;
+    this.isClosed = false;
     ws.addEventListener('open', (ev) => {
       this.isClosed = false;
       this.isConnecting = false;
