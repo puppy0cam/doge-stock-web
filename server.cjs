@@ -86,8 +86,10 @@ async function onReceiveRequest(request, response) {
 
   if (request.method.toUpperCase() !== 'GET') {
     response.writeHead(405, {
-      'Content-Length': 0,
+      'Content-Length': 70,
+      'Content-Type': 'application/json',
     });
+    response.write('{"ok":false,"reason":"Your request must be made within a GET request"}');
     response.end();
     return;
   }
