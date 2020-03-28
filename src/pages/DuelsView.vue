@@ -26,7 +26,7 @@
             <q-item-section>{{ $t('duels_table_option_view_winning_player') }}</q-item-section>
           </q-item>
           <q-item
-          v-if="props.row.winner.tag"
+          v-if="props.row.data.winner.tag"
           clickable
           @click="viewFightWinnerGuild($event, props.row)">
             <q-item-section>{{ $t('duels_table_option_view_winning_guild') }}</q-item-section>
@@ -35,7 +35,7 @@
             <q-item-section>{{ $t('duels_table_option_view_losing_player') }}</q-item-section>
           </q-item>
           <q-item
-          v-if="props.row.loser.tag"
+          v-if="props.row.data.loser.tag"
           clickable
           @click="viewFightLoserGuild($event, props.row)">
             <q-item-section>{{ $t('duels_table_option_view_losing_guild') }}</q-item-section>
