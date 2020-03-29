@@ -17,6 +17,7 @@ class ActiveWebsocket extends EventTarget {
     super();
     this.isConnecting = false;
     this.isClosed = true;
+    this.firstConnection = true;
     this.name = name;
     this.url = url;
     /** @type {WebSocket | null} */
@@ -36,6 +37,10 @@ class ActiveWebsocket extends EventTarget {
     this.isConnecting = true;
     this.isClosed = false;
     ws.addEventListener('open', (ev) => {
+      if (this.firstConnection) {
+        this.firstConnection = false;
+        ws.send('{"action":"getHistory","extra":"firstConnection"}');
+      }
       this.isClosed = false;
       this.isConnecting = false;
       console.debug('WebSocket connection to %s opened', this.url, ev);
@@ -58,7 +63,16 @@ class ActiveWebsocket extends EventTarget {
       this.eventDispatcher(ev);
     });
     ws.addEventListener('message', (ev) => {
-      if (!this.eventDispatcher(ev)) {
+      if (typeof ev.data === 'string') {
+        try {
+          const data = JSON.parse(ev.data);
+          if (data.action === 'getHistory' && data.ok) {
+            console.debug('Getting %s items from history', data.payload.count);
+          }
+        } catch (e) {
+          console.warn(e);
+        }
+      } else if (!this.eventDispatcher(ev)) {
         ev.preventDefault();
       }
     });
