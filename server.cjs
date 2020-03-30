@@ -6,6 +6,7 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-unused-vars */
 /* eslint-disable strict */
+const https = require('https');
 const uuid = require('uuid').v4;
 const {
   createServer,
@@ -125,6 +126,11 @@ function checkBotAuthSignature(data) {
       .update(checkString)
       .digest('hex');
     if (hmac === hash) {
+      https.get(`https://api.telegram.org/bot${currentConfig.servers[tokens.indexOf(token)].botToken}/sendMessage?chat_id=${data.id}&text=Logged%20into%20Doge%20Stock%20Successfully`, (res) => {
+        if (res.statusCode !== 200) {
+          console.warn('Failed to send message to %s of authorisation', data.id);
+        }
+      });
       return true;
     }
   }
