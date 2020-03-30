@@ -30,9 +30,6 @@ const {
 /** @type {import('knex')} */
 let globalKnex;
 const playerIdRegex = /^[abcdefghijklmnopqrstuvwxyz0123456789-]+$/;
-// eslint-disable-next-line max-len
-/** @type {Map<string, {id:string;first_name:string;last_name:string;username:string;photo_url:string;auth_date:string;hash:string;}>} */
-const verifiedUserAuthentications = new Map();
 /** @type {import('./credentials').Config} */
 let currentConfig = null;
 const configKnexInstances = new WeakMap();
@@ -106,7 +103,6 @@ async function getUserToken(server, userId) {
   }
   throw new Error('Invalid server');
 }
-
 function checkBotAuthSignature(data) {
   if (!tokenHashes.has(currentConfig)) {
     const newTokenHashes = [];
@@ -691,11 +687,16 @@ async function onReceiveRequest(request, response) {
         });
         response.end();
       } else {
-        let userUUID = uuid();
-        while (verifiedUserAuthentications.has(userUUID)) {
-          userUUID = uuid();
-        }
-        verifiedUserAuthentications.set(userUUID, params);
+        const userUUID = uuid();
+        await globalKnex('websessions').insert({
+          token: userUUID,
+          auth_date: new Date(Number(params.auth_date) * 1000),
+          telegram_user_id: Number(params.id),
+          first_name: (params.first_name && params.first_name.slice(0, 255)) || null,
+          last_name: (params.last_name && params.last_name.slice(0, 255)) || null,
+          username: (params.username && params.username.slice(0, 255)) || null,
+          photo_url: (params.photo_url && params.photo_url.slice(0, 2048)) || null,
+        });
         response.writeHead(302, {
           Location: `/#/auth/success/${userUUID}`,
         });
@@ -715,21 +716,23 @@ async function onReceiveRequest(request, response) {
       response.end();
       return;
     }
-    if (!verifiedUserAuthentications.has(params.token)) {
+    /** @type {{token:string;auth_date:Date;telegram_user_id:number;first_name?:string;last_name?:string;username?:string;photo_url?:string;}[]} */
+    const [tokenInfo] = await globalKnex('websessions').select({
+      auth_date: 'auth_date',
+      id: 'telegram_user_id',
+      first_name: 'first_name',
+      last_name: 'last_name',
+      username: 'username',
+      photo_url: 'photo_url',
+    }).where('token', params.token);
+    if (!tokenInfo) {
       response.writeHead(403, {
         'Content-Length': 0,
       });
       response.end();
       return;
     }
-    const originalQuery = verifiedUserAuthentications.get(params.token);
-    const res = Buffer.from(JSON.stringify({
-      id: Number(originalQuery.id),
-      first_name: originalQuery.first_name,
-      last_name: originalQuery.last_name,
-      username: originalQuery.username,
-      photo_url: originalQuery.photo_url,
-    }));
+    const res = Buffer.from(JSON.stringify(tokenInfo));
     response.writeHead(200, {
       'Content-Type': 'application/json',
       'Content-Length': res.byteLength,
@@ -737,26 +740,6 @@ async function onReceiveRequest(request, response) {
     response.write(res);
     response.end();
   } else if (path.pathname === '/exchange/wtb') {
-    /** @type {{id:string;first_name:string;last_name:string;username:string;photo_url:string;auth_date:string;hash:string;}} */
-    let authorisation;
-    if (params.token) {
-      authorisation = verifiedUserAuthentications.get(params.token);
-      if (!authorisation) {
-        response.writeHead(401, {
-          'Content-Length': 64,
-          'Content-Type': 'application/json',
-        });
-        response.write('{"ok":false,"reason":"This web authorisation token has expired"}');
-        response.end();
-        return;
-      }
-    } else {
-      response.writeHead(400, {
-        'Content-Length': 0,
-      });
-      response.end();
-      return;
-    }
     if (!params.server) {
       response.writeHead(400, {
         'Content-Length': 0,
@@ -787,6 +770,32 @@ async function onReceiveRequest(request, response) {
     }
     if (params.exactPrice !== 'true' && params.exactPrice !== 'false') {
       params.exactPrice = 'false';
+    }
+    /** @type {{id:number;auth_date:Date;}} */
+    let authorisation;
+    if (params.token) {
+      /** @type {{id:number;auth_date:Date;}[]} */
+      const [auth] = await globalKnex('websessions').where('token', params.token).select({
+        id: 'telegram_user_id',
+        auth_date: 'auth_date',
+      });
+      if (auth) {
+        authorisation = auth;
+      } else {
+        response.writeHead(401, {
+          'Content-Length': 64,
+          'Content-Type': 'application/json',
+        });
+        response.write('{"ok":false,"reason":"This web authorisation token has expired"}');
+        response.end();
+        return;
+      }
+    } else {
+      response.writeHead(400, {
+        'Content-Length': 0,
+      });
+      response.end();
+      return;
     }
     try {
       const token = await getUserToken(params.server, Number(authorisation.id));
