@@ -873,30 +873,6 @@ async function onReceiveRequest(request, response) {
       response.end();
       return;
     }
-  } else if (path.pathname === '/temp/deals') {
-    const result = await globalKnex('deals');
-    const cols = Object.keys(result[0]);
-    let csv = `"${cols.join('","')}"`;
-    for (const i of result) {
-      const row = [];
-      for (const col of cols) {
-        if (i[col] instanceof Date) {
-          row.push(`"${i[col].getUTCMonth() + 1}/${i[col].getUTCDate()}/${i[col].getUTCFullYear()} ${i[col].getUTCHours()}:${i[col].getUTCMinutes()}:${i[col].getUTCSeconds()}"`);
-        } else if (i[col] == null) {
-          row.push('');
-        } else {
-          row.push(JSON.stringify(i[col]));
-        }
-      }
-      csv += `\n${row.join(',')}`;
-    }
-    const INFO = Buffer.from(csv);
-    response.writeHead(200, {
-      'Content-Length': INFO.byteLength,
-      'Content-Type': 'text/csv',
-    });
-    response.write(INFO);
-    response.end();
   } else {
     response.writeHead(404, {
       'Content-Length': 145,
