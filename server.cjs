@@ -881,7 +881,7 @@ async function onReceiveRequest(request, response) {
       const row = [];
       for (const col of cols) {
         if (i[col] instanceof Date) {
-          row.push(`"${i[col].getUTCMonth() + 1}/${i[col].getUTCDate()}/${i[col].getUTCFullYear()} ${a.getUTCHours()}:${a.getUTCMinutes()}:${a.getUTCSeconds()}`);
+          row.push(`"${i[col].getUTCMonth() + 1}/${i[col].getUTCDate()}/${i[col].getUTCFullYear()} ${i[col].getUTCHours()}:${i[col].getUTCMinutes()}:${i[col].getUTCSeconds()}`);
         } else if (i[col] == null) {
           row.push('');
         } else {
