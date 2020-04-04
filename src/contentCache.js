@@ -92,7 +92,7 @@ if (location.protocol === 'https:') {
 /** @type {ActiveWebsocket[]} */
 export const activeWebsockets = [];
 for (const server of ['eucw', 'ru']) {
-  const duelsWebsocket = new ActiveWebsocket(`${server} duels`, `${websocketPrefix}${location.hostname}:${location.port}/${server}/duels`);
+  const duelsWebsocket = new ActiveWebsocket(`${server} duels`, `${websocketPrefix}www.doge-stock.com/${server}/duels`);
   activeWebsockets.push(duelsWebsocket);
   duelsWebsocket.addEventListener('message', (message) => {
     message.data.text().then(JSON.parse).then((data) => {
@@ -105,7 +105,7 @@ for (const server of ['eucw', 'ru']) {
     });
   });
   duelsWebsocket.connect();
-  const dealsWebsocket = new ActiveWebsocket(`${server} deals`, `${websocketPrefix}${location.hostname}:${location.port}/${server}/deals`);
+  const dealsWebsocket = new ActiveWebsocket(`${server} deals`, `${websocketPrefix}www.doge-stock.com/${server}/deals`);
   activeWebsockets.push(dealsWebsocket);
   dealsWebsocket.addEventListener('message', (message) => {
     message.data.text().then(JSON.parse).then((data) => {
@@ -118,7 +118,7 @@ for (const server of ['eucw', 'ru']) {
     });
   });
   dealsWebsocket.connect();
-  const offersWebsocket = new ActiveWebsocket(`${server} offers`, `${websocketPrefix}${location.hostname}:${location.port}/${server}/offers`);
+  const offersWebsocket = new ActiveWebsocket(`${server} offers`, `${websocketPrefix}www.doge-stock.com/${server}/offers`);
   activeWebsockets.push(offersWebsocket);
   offersWebsocket.addEventListener('message', (message) => {
     message.data.text().then(JSON.parse).then((data) => {
