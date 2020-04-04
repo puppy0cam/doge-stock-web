@@ -152,7 +152,7 @@ async function toJson(data) {
  */
 export async function getPlayerSpaiHistory(server, id) {
   /** @type {{schemaVersion:string;data:{name:string;castle:string;guild_tag:string|null;timestamp:number;}[]}} */
-  const result = await sendRequest(`//www.doge-stock.com/spai/player/history?server=${server}&id=${id}`);
+  const result = await sendRequest(`/spai/player/history?server=${server}&id=${id}`);
   if (result.schemaVersion !== '1.0.0') {
     throw new Error('Schema is out of date');
   }
