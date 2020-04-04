@@ -174,7 +174,7 @@ function mapValue(value) {
  */
 export async function findSpaiPlayer(server, name) {
   /** @type {{schemaVersion:string;data:{name:string;castle:string;guild_tag:string|null;timestamp:number;}[]}} */
-  const result = await sendRequest(`//www.doge-stock.com/spai/player/find?server=${server}&name=${name}`);
+  const result = await sendRequest(`/spai/player/find?server=${server}&name=${name}`);
   if (result.schemaVersion !== '1.0.0') {
     throw new Error('Schema is out of date');
   }
@@ -197,7 +197,7 @@ function mapValue(value) {
  */
 export async function findSpaiGuild(server, tag) {
   /** @type {{schemaVersion:string;data:{tag:string;castle:string;}[]}} */
-  const result = await sendRequest(`//www.doge-stock.com/spai/guild?server=${server}&tag=${tag}`);
+  const result = await sendRequest(`/spai/guild?server=${server}&tag=${tag}`);
   if (result.schemaVersion !== '1.0.0') {
     throw new Error('Schema is out of date');
   }
@@ -217,7 +217,7 @@ function mapValue(value) {
  */
 export async function getGuildMembers(server, tag) {
   /** @type {{schemaVersion:string;data:{cwid:string;ign:string;castle:string;}[]}} */
-  const result = await sendRequest(`//www.doge-stock.com/spai/guild/members?server=${server}&tag=${tag}`);
+  const result = await sendRequest(`/spai/guild/members?server=${server}&tag=${tag}`);
   if (result.schemaVersion !== '1.0.0') {
     throw new Error('Schema is out of date');
   }
@@ -242,7 +242,7 @@ export async function getAllGuilds(server) {
     }
   }
   /** @type {{schemaVersion:string;data:{tag:string;castle:string;}[];}} */
-  const result = await sendRequest(`//www.doge-stock.com/spai/guild/all?server=${server}`);
+  const result = await sendRequest(`/spai/guild/all?server=${server}`);
   if (result.schemaVersion !== '1.0.0') {
     throw new Error('Schema is out of date');
   }
@@ -272,7 +272,7 @@ export async function getAllPlayers(server) {
     }
   }
   /** @type {{schemaVersion:string;data:{cwid:string;ign:string;castle:string;guild_tag:string|null;}[];}} */
-  const result = await sendRequest(`//www.doge-stock.com/spai/player/all?server=${server}`);
+  const result = await sendRequest(`/spai/player/all?server=${server}`);
   if (result.schemaVersion !== '1.0.0') {
     throw new Error('Schema is out of date');
   }
@@ -305,7 +305,7 @@ getAllPlayers.cache = new Map();
  */
 export async function getAllPlayersSmart(server, startRow, fetchCount, filter, sortBy, direction) {
   /** @type {{schemaVersion:string;data:{cwid:string;ign:string;castle:string;guild_tag:string|null;}[];}} */
-  const result = await sendRequest(`//www.doge-stock.com/spai/player/all/smart?server=${server}&startRow=${startRow}&fetchCount=${fetchCount}&sortBy=${sortBy}&direction=${direction}&filter=${encodeURIComponent(filter)}`);
+  const result = await sendRequest(`/spai/player/all/smart?server=${server}&startRow=${startRow}&fetchCount=${fetchCount}&sortBy=${sortBy}&direction=${direction}&filter=${encodeURIComponent(filter)}`);
   if (result.schemaVersion !== '1.0.0') {
     throw new Error('Schema is out of date');
   }
@@ -328,7 +328,7 @@ function mapValue(value) {
  */
 export async function getAllPlayersCount(server, filter) {
   /** @type {{schemaVersion:string;data:number;}} */
-  const result = await sendRequest(`//www.doge-stock.com/spai/player/count?server=${server}&filter=${filter}`);
+  const result = await sendRequest(`/spai/player/count?server=${server}&filter=${filter}`);
   if (result.schemaVersion !== '1.0.1') {
     throw new Error('Schema is out of date');
   }
@@ -345,7 +345,7 @@ export async function getTelegramUserDetails() {
       ...getTelegramUserDetails.cache,
     };
   }
-  getTelegramUserDetails.cache = await sendRequest(`//www.doge-stock.com/auth/telegram/check?token=${storageKey}`);
+  getTelegramUserDetails.cache = await sendRequest(`/auth/telegram/check?token=${storageKey}`);
   return {
     ...getTelegramUserDetails.cache,
   };
@@ -358,5 +358,5 @@ export async function getTelegramUserDetails() {
  * @param {boolean=} exactPrice
  */
 export async function wantToBuy(server, itemCode, quantity, price, exactPrice) {
-  return sendRequest(`//www.doge-stock.com/exchange/wtb?server=${server}&token=${localStorage.getItem('telegramUserToken')}&itemCode=${itemCode}&quantity=${quantity}&price=${price}&exactPrice=${Boolean(exactPrice)}`);
+  return sendRequest(`/exchange/wtb?server=${server}&token=${localStorage.getItem('telegramUserToken')}&itemCode=${itemCode}&quantity=${quantity}&price=${price}&exactPrice=${Boolean(exactPrice)}`);
 }
