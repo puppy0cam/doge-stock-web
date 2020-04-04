@@ -165,7 +165,7 @@ function mapValue(value) {
     castle: value.castle,
     guild_tag: value.guild_tag,
     name: value.name,
-    timestamp: new Date(value.timestamp * 1000),
+    timestamp: new Date(value.timestamp),
   };
 };
 /**
@@ -187,7 +187,7 @@ function mapValue(value) {
     castle: value.castle,
     guild_tag: value.guild_tag,
     name: value.name,
-    timestamp: new Date(value.timestamp * 1000),
+    timestamp: new Date(value.timestamp),
   };
 };
 /**
