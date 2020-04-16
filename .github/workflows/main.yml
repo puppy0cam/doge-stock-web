@@ -39,11 +39,7 @@ jobs:
       run: quasar build
 
     - name: Run compression algorithms
-      run: |
-        gzip -r9kf dist
-        brotli -fZk dist/*/*.*
-        brotli -fZk dist/*/*/*.*
-        brotli -fZk dist/*/*/*/*.*
+      run: node compress.cjs
 
     - name: Copy Build Result
       run: cp -rf  dist /home/puppy0cam/DogeStock/Web/
