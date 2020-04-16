@@ -1,6 +1,13 @@
 <template>
 <q-page>
-  <q-table :data="history" :columns="columns" flat :filter="filter" :loading="loading">
+  <q-table
+    :pagination="pagination"
+    :data="history"
+    :columns="columns"
+    flat
+    :filter="filter"
+    :loading="loading"
+  >
     <template v-slot:top>
       <q-space />
       <q-input
@@ -80,6 +87,13 @@ export default {
           sortable: true,
         },
       ],
+      pagination: {
+        page: 1,
+        // eslint-disable-next-line no-restricted-globals
+        rowsPerPage: Math.min(Math.max(Math.floor((screen.availHeight - 200) / 50), 6), 26) - 1,
+        sortBy: 'timestamp',
+        descending: true,
+      },
       loading: false,
     };
   },
