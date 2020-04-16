@@ -60,19 +60,7 @@ export default {
     };
   },
   mounted() {
-    this.loading = true;
-    import('../contentCache.js').then((contentCache) => {
-      const {
-        getGuildMembers,
-      } = contentCache;
-      getGuildMembers(this.server, this.tag).then((members) => {
-        this.members = members;
-        this.loading = false;
-      }, (error) => {
-        this.loading = false;
-        console.error(error);
-      });
-    });
+    this.refresh();
   },
   props: {
     server: {
@@ -87,42 +75,31 @@ export default {
   watch: {
     server(newValue, oldValue) {
       if (newValue !== oldValue) {
-        this.loading = true;
-        import('../contentCache.js').then((contentCache) => {
-          const {
-            getGuildMembers,
-          } = contentCache;
-          getGuildMembers(newValue, this.tag).then((members) => {
-            this.members = members;
-            this.loading = false;
-          }, (error) => {
-            this.loading = false;
-            console.error(error);
-          });
-        });
+        this.refresh();
       }
     },
     tag(newValue, oldValue) {
       if (newValue !== oldValue) {
-        this.loading = true;
-        import('../contentCache.js').then((contentCache) => {
-          const {
-            getGuildMembers,
-          } = contentCache;
-          getGuildMembers(this.server, newValue).then((members) => {
-            this.members = members;
-            this.loading = false;
-          }, (error) => {
-            this.loading = false;
-            console.error(error);
-          });
-        });
+        this.refresh();
       }
     },
   },
   methods: {
     onClickRow(event, row) {
       this.$router.push(`/playerhistory/${this.server}/${row.cwid}`);
+    },
+    async refresh() {
+      this.loading = true;
+      try {
+        const {
+          getGuildMembers,
+        } = await import('../contentCache.js');
+        this.members = await getGuildMembers(this.server, this.tag);
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        this.loading = false;
+      }
     },
   },
 };
