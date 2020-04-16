@@ -83,16 +83,10 @@ export async function registerUserToken(token) {
   localStorage.setItem('telegramUserToken', token);
 }
 
-let websocketPrefix;
-if (location.protocol === 'https:') {
-  websocketPrefix = 'wss://';
-} else {
-  websocketPrefix = 'ws://';
-}
 /** @type {ActiveWebsocket[]} */
 export const activeWebsockets = [];
 for (const server of ['eucw', 'ru']) {
-  const duelsWebsocket = new ActiveWebsocket(`${server} duels`, `${websocketPrefix}www.doge-stock.com/${server}/duels`);
+  const duelsWebsocket = new ActiveWebsocket(`${server} duels`, `wss://doge-stock.com/${server}/duels`);
   activeWebsockets.push(duelsWebsocket);
   duelsWebsocket.addEventListener('message', (message) => {
     message.data.text().then(JSON.parse).then((data) => {
@@ -105,7 +99,7 @@ for (const server of ['eucw', 'ru']) {
     });
   });
   duelsWebsocket.connect();
-  const dealsWebsocket = new ActiveWebsocket(`${server} deals`, `${websocketPrefix}www.doge-stock.com/${server}/deals`);
+  const dealsWebsocket = new ActiveWebsocket(`${server} deals`, `wss://doge-stock.com/${server}/deals`);
   activeWebsockets.push(dealsWebsocket);
   dealsWebsocket.addEventListener('message', (message) => {
     message.data.text().then(JSON.parse).then((data) => {
@@ -118,7 +112,7 @@ for (const server of ['eucw', 'ru']) {
     });
   });
   dealsWebsocket.connect();
-  const offersWebsocket = new ActiveWebsocket(`${server} offers`, `${websocketPrefix}www.doge-stock.com/${server}/offers`);
+  const offersWebsocket = new ActiveWebsocket(`${server} offers`, `wss://doge-stock.com/${server}/offers`);
   activeWebsockets.push(offersWebsocket);
   offersWebsocket.addEventListener('message', (message) => {
     message.data.text().then(JSON.parse).then((data) => {
