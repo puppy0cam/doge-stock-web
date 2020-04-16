@@ -84,6 +84,42 @@ export default {
       required: true,
     },
   },
+  watch: {
+    server(newValue, oldValue) {
+      if (newValue !== oldValue) {
+        this.loading = true;
+        import('../contentCache.js').then((contentCache) => {
+          const {
+            getGuildMembers,
+          } = contentCache;
+          getGuildMembers(newValue, this.tag).then((members) => {
+            this.members = members;
+            this.loading = false;
+          }, (error) => {
+            this.loading = false;
+            console.error(error);
+          });
+        });
+      }
+    },
+    tag(newValue, oldValue) {
+      if (newValue !== oldValue) {
+        this.loading = true;
+        import('../contentCache.js').then((contentCache) => {
+          const {
+            getGuildMembers,
+          } = contentCache;
+          getGuildMembers(this.server, newValue).then((members) => {
+            this.members = members;
+            this.loading = false;
+          }, (error) => {
+            this.loading = false;
+            console.error(error);
+          });
+        });
+      }
+    },
+  },
   methods: {
     onClickRow(event, row) {
       this.$router.push(`/playerhistory/${this.server}/${row.cwid}`);
