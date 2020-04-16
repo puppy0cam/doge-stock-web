@@ -84,23 +84,36 @@ export default {
     };
   },
   mounted() {
-    this.loading = true;
-    import('../contentCache.js').then((contentCache) => {
-      const {
-        getPlayerSpaiHistory,
-      } = contentCache;
-      getPlayerSpaiHistory(this.server, this.id).then((history) => {
-        this.history = history;
-        this.loading = false;
-      }, (error) => {
-        this.loading = false;
-        console.error(error);
-      });
-    });
+    this.refresh();
   },
   methods: {
+    async refresh() {
+      this.loading = true;
+      try {
+        const {
+          getPlayerSpaiHistory,
+        } = await import('../contentCache.js');
+        this.history = await getPlayerSpaiHistory(this.server, this.id);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.loading = false;
+      }
+    },
     viewPlayerGuild(event, row) {
       this.$router.push(`/guildmembers/${this.server}/${row.guild_tag}`);
+    },
+  },
+  watch: {
+    server(newValue, oldValue) {
+      if (newValue !== oldValue) {
+        this.refresh();
+      }
+    },
+    id(newValue, oldValue) {
+      if (newValue !== oldValue) {
+        this.refresh();
+      }
     },
   },
   props: {
