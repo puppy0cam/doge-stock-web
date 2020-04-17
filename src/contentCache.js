@@ -181,12 +181,16 @@ export async function findSpaiPlayer(server, name) {
 findSpaiPlayer.mapValue =
 /** @param {{name:string;castle:string;guild_tag:string|null;timestamp:number;}} value */
 function mapValue(value) {
-  return {
+  const result = {
     castle: value.castle,
     guild_tag: value.guild_tag,
     name: value.name,
     timestamp: new Date(value.timestamp),
   };
+  if (result.timestamp.valueOf() < 9999999999) {
+    result.timestamp.setTime(result.timestamp.valueOf() * 1000);
+  }
+  return result;
 };
 /**
  * @param {"eucw"|"ru"} server
