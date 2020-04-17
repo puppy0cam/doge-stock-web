@@ -6,6 +6,7 @@
   flat
   :filter="filter"
   @row-click="clickOfferRow"
+  :pagination="pagination"
   >
     <template v-slot:top>
       <q-space />
@@ -90,6 +91,11 @@ export default {
           field: (row) => row.data.price,
         },
       ],
+      pagination: {
+        page: 1,
+        // eslint-disable-next-line no-restricted-globals
+        rowsPerPage: Math.min(Math.max(Math.floor((screen.availHeight - 200) / 50), 6), 26) - 1,
+      },
       authorised: false,
     };
   },
