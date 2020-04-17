@@ -78,11 +78,6 @@ export default {
           format: (value) => this.$t(`duels_view_col_isGuildDuel_value_${value}`),
         },
         {
-          name: 'winnerId',
-          label: this.$t('duels_view_col_winnerId_label'),
-          field: (row) => row.data.winner.id,
-        },
-        {
           name: 'winnerName',
           label: this.$t('duels_view_col_winnerName_label'),
           field: (row) => row.data.winner.name,
@@ -112,11 +107,6 @@ export default {
           name: 'winnerHp',
           label: this.$t('duels_view_col_winnerHp_label'),
           field: (row) => row.data.winner.hp,
-        },
-        {
-          name: 'loserId',
-          label: this.$t('duels_view_col_loserId_label'),
-          field: (row) => row.data.loser.id,
         },
         {
           name: 'loserName',
