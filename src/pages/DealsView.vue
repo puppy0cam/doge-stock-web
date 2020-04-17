@@ -1,6 +1,6 @@
 <template>
 <q-page>
-  <q-table :data="deals" :columns="columns" flat :filter="filter">
+  <q-table :data="deals" :columns="columns" flat :filter="filter" :pagination="pagination">
     <template v-slot:top>
       <q-space />
       <q-input borderless
@@ -40,6 +40,11 @@ export default {
     return {
       deals: [],
       filter: '',
+      pagination: {
+        page: 1,
+        // eslint-disable-next-line no-restricted-globals
+        rowsPerPage: Math.min(Math.max(Math.floor((screen.availHeight - 200) / 50), 6), 26) - 1,
+      },
       columns: [
         {
           name: 'server',
