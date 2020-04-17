@@ -66,7 +66,7 @@ export default {
         {
           name: 'buyerCastle',
           label: this.$t('deals_view_col_buyerCastle_label'),
-          field: (row) => row.data.buyercastle,
+          field: (row) => row.data.buyerCastle,
         },
         {
           name: 'buyerName',
