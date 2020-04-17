@@ -54,11 +54,6 @@ export default {
           align: 'left',
         },
         {
-          name: 'sellerId',
-          label: this.$t('deals_view_col_sellerId_label'),
-          field: (row) => row.data.sellerId,
-        },
-        {
           name: 'sellerCastle',
           label: this.$t('deals_view_col_sellerCastle_label'),
           field: (row) => row.data.sellerCastle,
@@ -67,11 +62,6 @@ export default {
           name: 'sellerName',
           label: this.$t('deals_view_col_sellerName_label'),
           field: (row) => row.data.sellerName,
-        },
-        {
-          name: 'buyerId',
-          label: this.$t('deals_view_col_buyerId_label'),
-          field: (row) => row.data.buyerId,
         },
         {
           name: 'buyerCastle',
