@@ -7,6 +7,7 @@
   :filter="filter"
   :loading="loading"
   @row-click="onClickRow"
+  :pagination.sync="pagination"
   >
     <template v-slot:top>
       <q-space />
@@ -31,6 +32,11 @@ export default {
   name: 'PageGuildMembers',
   data() {
     return {
+      pagination: {
+        page: 1,
+        // eslint-disable-next-line no-restricted-globals
+        rowsPerPage: Math.min(Math.max(Math.floor((screen.availHeight - 200) / 50), 6), 26) - 1,
+      },
       members: [],
       columns: [
         {
