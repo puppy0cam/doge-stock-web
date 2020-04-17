@@ -7,6 +7,7 @@
   flat
   :filter="filter"
   @row-click="clickGuildRow"
+  :pagination.sync="pagination"
   >
     <template v-slot:top>
       <q-btn-dropdown
@@ -74,6 +75,11 @@ export default {
         },
       ],
       loading: false,
+      pagination: {
+        page: 1,
+        // eslint-disable-next-line no-restricted-globals
+        rowsPerPage: Math.min(Math.max(Math.floor((screen.availHeight - 200) / 50), 6), 26) - 1,
+      },
       filter: '',
       serverSelected: 'EUCW',
       availableServers: ['EUCW', 'RU'],
