@@ -40,13 +40,6 @@ export default {
       members: [],
       columns: [
         {
-          name: 'cwid',
-          label: this.$t('guild_members_col_cwid_label'),
-          field: 'cwid',
-          required: true,
-          align: 'left',
-        },
-        {
           name: 'ign',
           label: this.$t('guild_members_col_ign_label'),
           field: 'ign',
