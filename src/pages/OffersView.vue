@@ -6,7 +6,7 @@
   flat
   :filter="filter"
   @row-click="clickOfferRow"
-  :pagination="pagination"
+  :pagination.sync="pagination"
   >
     <template v-slot:top>
       <q-space />

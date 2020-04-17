@@ -1,7 +1,7 @@
 <template>
 <q-page>
   <q-table
-    :pagination="pagination"
+    :pagination.sync="pagination"
     :data="history"
     :columns="columns"
     flat

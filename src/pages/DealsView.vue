@@ -1,6 +1,6 @@
 <template>
 <q-page>
-  <q-table :data="deals" :columns="columns" flat :filter="filter" :pagination="pagination">
+  <q-table :data="deals" :columns="columns" flat :filter="filter" :pagination.sync="pagination">
     <template v-slot:top>
       <q-space />
       <q-input borderless

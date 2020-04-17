@@ -7,7 +7,7 @@
   flat
   :filter="filter"
   @row-click="clickPlayerRow"
-  :pagination="pagination"
+  :pagination.sync="pagination"
   @request="onRequest"
   >
     <template v-slot:top>
