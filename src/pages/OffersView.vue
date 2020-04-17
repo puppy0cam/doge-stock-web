@@ -61,11 +61,6 @@ export default {
           align: 'left',
         },
         {
-          name: 'sellerId',
-          label: this.$t('offers_view_col_sellerId_label'),
-          field: (row) => row.data.sellerId,
-        },
-        {
           name: 'sellerCastle',
           label: this.$t('offers_view_col_sellerCastle_label'),
           field: (row) => row.data.sellerCastle,
