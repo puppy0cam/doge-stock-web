@@ -17,7 +17,7 @@
         </q-toolbar-title>
         <q-btn
         flat
-        v-for="ws in websockets" v-bind:key="ws"
+        v-for="ws in websockets" v-bind:key="ws.name"
         :label="$t('ws_disconnected_want_reconnect', ws)"
         :loading="ws.isConnecting"
         @click="reconnectWebsocket(ws)"
