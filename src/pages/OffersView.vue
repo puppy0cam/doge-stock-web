@@ -38,6 +38,25 @@
           @click="purchaseItem($event, props.row)">
             <q-item-section>{{ $t('offers_table_option_purchase_item') }}</q-item-section>
           </q-item>
+          <q-separator v-if="props.row.pricing" />
+          <q-item v-if="props.row.pricing">
+            <q-item-section :class="getPriceClass(props.row.pricing.min, props.row.data.price)">
+            {{ $t('offers_table_option_min_diff_prefix') }}
+            {{ formatPriceDiff(props.row.data.price - props.row.pricing.min) }}
+            </q-item-section>
+          </q-item>
+          <q-item v-if="props.row.pricing">
+            <q-item-section :class="getPriceClass(props.row.pricing.avg, props.row.data.price)">
+            {{ $t('offers_table_option_avg_diff_prefix') }}
+            {{ formatPriceDiff(props.row.data.price - props.row.pricing.avg) }}
+            </q-item-section>
+          </q-item>
+          <q-item v-if="props.row.pricing">
+            <q-item-section :class="getPriceClass(props.row.pricing.max, props.row.data.price)">
+            {{ $t('offers_table_option_max_diff_prefix') }}
+            {{ formatPriceDiff(props.row.data.price - props.row.pricing.max) }}
+            </q-item-section>
+          </q-item>
         </q-menu>
       </q-tr>
     </template>
@@ -111,6 +130,21 @@ export default {
   methods: {
     clickOfferRow(event, row) {
       this.$router.push(`/playerhistory/${row.server}/${row.data.sellerId}`);
+    },
+    getPriceClass(expected, actual) {
+      if (expected < actual) {
+        return 'higherprice';
+      }
+      if (expected > actual) {
+        return 'lowerprice';
+      }
+      return '';
+    },
+    formatPriceDiff(price) {
+      if (price > 0) {
+        return `+${price.toFixed(2)}`;
+      }
+      return price.toFixed(2);
     },
     purchaseItem(event, row) {
       import('../contentCache.js').then((contentcache) => {
@@ -210,3 +244,12 @@ export default {
 };
 
 </script>
+
+<style>
+.lowerprice {
+  color: green;
+}
+.higherprice {
+  color: red;
+}
+</style>

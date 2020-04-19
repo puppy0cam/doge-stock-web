@@ -4,10 +4,30 @@
 
 /** @type {{server:"eucw"|"ru";data:{item:string;qty:number;price:number;sellerId:string;sellerName:string;sellerCastle:string;buyerId:string;buyerName:string;buyerCastle:string;}}[]} */
 export const deals = [];
-/** @type {{server:"eucw"|"ru";data:{item:string;qty:number;price:number;sellerId:string;sellerName:string;sellerCastle:string;}}[]} */
+/** @type {{server:"eucw"|"ru";data:{item:string;qty:number;price:number;sellerId:string;sellerName:string;sellerCastle:string;};pricing:null|{avg:number;min:number;max:number;};}[]} */
 export const offers = [];
 /** @type {{server:"eucw"|"ru";data:{isChallenge:boolean;isGuildDuel:boolean;winner:{id:string;name:string;tag?:string;castle:string;level:number;hp:number;};loser:{id:string;name:string;tag?:string;castle:string;level:number;hp:number;};}}[]} */
 export const duels = [];
+/** @type {{[key in "eucw"|"ru"]:{[itemName: string]:{min:number;max:number;avg:number;};};}} */
+export const stockExchangeStatus = {
+  eucw: {},
+  ru: {},
+};
+/**
+ * @returns {null | {min:number;max:number;avg:number;}}
+ * @param {'eucw'|'ru'} server
+ * @param {string} itemName
+ */
+export function getItemStockValue(server, itemName) {
+  const serverInstance = stockExchangeStatus[server];
+  if (serverInstance) {
+    const itemInstance = serverInstance[itemName];
+    if (itemInstance) {
+      return itemInstance;
+    }
+  }
+  return null;
+}
 class ActiveWebsocket extends EventTarget {
   /**
    * @param {string} name
@@ -86,6 +106,13 @@ export async function registerUserToken(token) {
 /** @type {ActiveWebsocket[]} */
 export const activeWebsockets = [];
 for (const server of ['eucw', 'ru']) {
+  switch (server) {
+    default:
+      // eslint-disable-next-line no-continue
+      continue;
+    case 'eucw':
+    case 'ru':
+  }
   const duelsWebsocket = new ActiveWebsocket(`${server} duels`, `wss://doge-stock.com/${server}/duels`);
   activeWebsockets.push(duelsWebsocket);
   duelsWebsocket.addEventListener('message', (message) => {
@@ -119,12 +146,47 @@ for (const server of ['eucw', 'ru']) {
       offers.push({
         server,
         data,
+        pricing: getItemStockValue(server, data.item),
       });
     }).catch((error) => {
       console.error('%s offers failed to be parsed', server, message, error);
     });
   });
   offersWebsocket.connect();
+  const stockExchangeDigestWebsocket = new ActiveWebsocket(`${server} Stock Prices`, `wss://doge-stock.com/${server}/sex_digest`);
+  activeWebsockets.push(stockExchangeDigestWebsocket);
+  stockExchangeDigestWebsocket.addEventListener('message', (message) => {
+    message.data.text().then(JSON.parse).then((data) => {
+      const serverInstance = stockExchangeStatus[server];
+      for (const {
+        name: itemName,
+        prices,
+      } of data) {
+        // eslint-disable-next-line no-multi-assign
+        const item = serverInstance[itemName] = {
+          avg: NaN,
+          min: Infinity,
+          max: -Infinity,
+        };
+        let min = Infinity;
+        let max = -Infinity;
+        let total = 0;
+        for (const i of prices) {
+          if (i > max) {
+            max = i;
+          }
+          if (i < min) {
+            min = i;
+          }
+          total += i;
+        }
+        item.min = min;
+        item.max = max;
+        item.avg = Math.round((total / prices.length) * 100) / 100;
+      }
+    });
+  });
+  stockExchangeDigestWebsocket.connect();
 }
 async function sendRequest(url) {
   const response = await fetch(url);

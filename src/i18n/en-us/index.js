@@ -155,4 +155,7 @@ export default {
   deals_table_option_view_buying_player: 'View Buyer',
   player_history_table_view_guild: 'View Guild',
   offers_table_option_purchase_item: 'Purchase item',
+  offers_table_option_avg_diff_prefix: 'Avg: ',
+  offers_table_option_max_diff_prefix: 'Max: ',
+  offers_table_option_min_diff_prefix: 'Min: ',
 };
