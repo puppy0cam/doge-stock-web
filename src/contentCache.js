@@ -102,7 +102,12 @@ class ActiveWebsocket extends EventTarget {
 export async function registerUserToken(token) {
   localStorage.setItem('telegramUserToken', token);
 }
-
+function sortTimestamp(a, b) {
+  if (a.timestamp && b.timestamp) {
+    return a.timestamp.valueOf() - b.timestamp.valueOf();
+  }
+  return 0;
+}
 /** @type {ActiveWebsocket[]} */
 export const activeWebsockets = [];
 for (const server of ['eucw', 'ru']) {
@@ -122,6 +127,7 @@ for (const server of ['eucw', 'ru']) {
       data: data.content,
       timestamp: new Date(data.timestamp_in_ms || data.timestamp * 1000),
     });
+    duels.sort(sortTimestamp);
   });
   duelsWebsocket.connect();
   const dealsWebsocket = new ActiveWebsocket(`${server} deals`, `wss://doge-stock.com/${server}/deals`);
@@ -133,6 +139,7 @@ for (const server of ['eucw', 'ru']) {
       data: data.content,
       timestamp: new Date(data.timestamp_in_ms || data.timestamp * 1000),
     });
+    deals.sort(sortTimestamp);
   });
   dealsWebsocket.connect();
   const offersWebsocket = new ActiveWebsocket(`${server} offers`, `wss://doge-stock.com/${server}/offers`);
@@ -145,6 +152,7 @@ for (const server of ['eucw', 'ru']) {
       timestamp: new Date(data.timestamp_in_ms || data.timestamp * 1000),
       pricing: getItemStockValue(server, data.content.item),
     });
+    offers.sort(sortTimestamp);
   });
   offersWebsocket.connect();
   const stockExchangeDigestWebsocket = new ActiveWebsocket(`${server} Stock Prices`, `wss://doge-stock.com/${server}/sex_digest`);
