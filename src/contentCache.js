@@ -135,6 +135,7 @@ for (const server of ['eucw', 'ru']) {
   activeWebsockets.push(dealsWebsocket);
   dealsWebsocket.addEventListener('message', (message) => {
     const data = JSON.parse(message.data);
+    if (data.action) return;
     deals.push({
       server,
       data: data.content,
