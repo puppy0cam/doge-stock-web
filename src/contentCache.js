@@ -122,6 +122,7 @@ for (const server of ['eucw', 'ru']) {
   activeWebsockets.push(duelsWebsocket);
   duelsWebsocket.addEventListener('message', (message) => {
     const data = JSON.parse(message.data);
+    if (data.action) return;
     duels.push({
       server,
       data: data.content,
@@ -146,6 +147,7 @@ for (const server of ['eucw', 'ru']) {
   activeWebsockets.push(offersWebsocket);
   offersWebsocket.addEventListener('message', (message) => {
     const data = JSON.parse(message.data);
+    if (data.action) return;
     offers.push({
       server,
       data: data.content,
@@ -159,6 +161,7 @@ for (const server of ['eucw', 'ru']) {
   activeWebsockets.push(stockExchangeDigestWebsocket);
   stockExchangeDigestWebsocket.addEventListener('message', (message) => {
     const data = JSON.parse(message.data);
+    if (data.action) return;
     const serverInstance = stockExchangeStatus[server];
     for (const {
       name: itemName,
