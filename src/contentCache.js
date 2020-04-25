@@ -83,17 +83,17 @@ class ActiveWebsocket extends EventTarget {
       this.eventDispatcher(ev);
     });
     ws.addEventListener('message', (ev) => {
-      if (typeof ev.data === 'string') {
-        try {
-          const data = JSON.parse(ev.data);
-          if (data.action === 'getHistory' && data.ok) {
-            console.debug('Getting %s items from history', data.payload.count);
-          }
-        } catch (e) {
-          console.warn(e);
+      try {
+        const data = JSON.parse(ev.data);
+        if (data.action === 'getHistory' && data.ok) {
+          console.debug('Getting %s items from history', data.payload.count);
         }
-      } else if (!this.eventDispatcher(ev)) {
-        ev.preventDefault();
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        if (!this.eventDispatcher(ev)) {
+          ev.preventDefault();
+        }
       }
     });
   }
@@ -116,75 +116,68 @@ for (const server of ['eucw', 'ru']) {
   const duelsWebsocket = new ActiveWebsocket(`${server} duels`, `wss://doge-stock.com/${server}/duels`);
   activeWebsockets.push(duelsWebsocket);
   duelsWebsocket.addEventListener('message', (message) => {
-    message.data.text().then(JSON.parse).then((data) => {
-      duels.push({
-        server,
-        data,
-      });
-    }).catch((error) => {
-      console.error('%s duels failed to be parsed', server, message, error);
+    const data = JSON.parse(message.data);
+    duels.push({
+      server,
+      data: data.content,
+      timestamp: new Date(data.timestamp_in_ms || data.timestamp * 1000),
     });
   });
   duelsWebsocket.connect();
   const dealsWebsocket = new ActiveWebsocket(`${server} deals`, `wss://doge-stock.com/${server}/deals`);
   activeWebsockets.push(dealsWebsocket);
   dealsWebsocket.addEventListener('message', (message) => {
-    message.data.text().then(JSON.parse).then((data) => {
-      deals.push({
-        server,
-        data,
-      });
-    }).catch((error) => {
-      console.error('%s deals failed to be parsed', server, message, error);
+    const data = JSON.parse(message.data);
+    deals.push({
+      server,
+      data: data.content,
+      timestamp: new Date(data.timestamp_in_ms || data.timestamp * 1000),
     });
   });
   dealsWebsocket.connect();
   const offersWebsocket = new ActiveWebsocket(`${server} offers`, `wss://doge-stock.com/${server}/offers`);
   activeWebsockets.push(offersWebsocket);
   offersWebsocket.addEventListener('message', (message) => {
-    message.data.text().then(JSON.parse).then((data) => {
-      offers.push({
-        server,
-        data,
-        pricing: getItemStockValue(server, data.item),
-      });
-    }).catch((error) => {
-      console.error('%s offers failed to be parsed', server, message, error);
+    const data = JSON.parse(message.data);
+    offers.push({
+      server,
+      data: data.content,
+      timestamp: new Date(data.timestamp_in_ms || data.timestamp * 1000),
+      pricing: getItemStockValue(server, data.content.item),
     });
   });
   offersWebsocket.connect();
   const stockExchangeDigestWebsocket = new ActiveWebsocket(`${server} Stock Prices`, `wss://doge-stock.com/${server}/sex_digest`);
   activeWebsockets.push(stockExchangeDigestWebsocket);
   stockExchangeDigestWebsocket.addEventListener('message', (message) => {
-    message.data.text().then(JSON.parse).then((data) => {
-      const serverInstance = stockExchangeStatus[server];
-      for (const {
-        name: itemName,
-        prices,
-      } of data) {
-        // eslint-disable-next-line no-multi-assign
-        const item = serverInstance[itemName] = {
-          avg: NaN,
-          min: Infinity,
-          max: -Infinity,
-        };
-        let min = Infinity;
-        let max = -Infinity;
-        let total = 0;
-        for (const i of prices) {
-          if (i > max) {
-            max = i;
-          }
-          if (i < min) {
-            min = i;
-          }
-          total += i;
+    const data = JSON.parse(message.data);
+    const serverInstance = stockExchangeStatus[server];
+    for (const {
+      name: itemName,
+      prices,
+    } of data.content) {
+      // eslint-disable-next-line no-multi-assign
+      const item = serverInstance[itemName] = {
+        avg: NaN,
+        min: Infinity,
+        max: -Infinity,
+      };
+      let min = Infinity;
+      let max = -Infinity;
+      let total = 0;
+      for (const i of prices) {
+        if (i > max) {
+          max = i;
         }
-        item.min = min;
-        item.max = max;
-        item.avg = Math.round((total / prices.length) * 100) / 100;
+        if (i < min) {
+          min = i;
+        }
+        total += i;
       }
-    });
+      item.min = min;
+      item.max = max;
+      item.avg = Math.round((total / prices.length) * 100) / 100;
+    }
   });
   stockExchangeDigestWebsocket.connect();
 }
