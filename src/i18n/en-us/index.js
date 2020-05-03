@@ -2,47 +2,17 @@
 
 const home_page_content = `\
 # Doge Stock
-Welcome to Doge Stock,
-this website is still is it's early stages.
-Check back later for updates!
+This website, as it relates to Chat Wars, will be shut down permanently at the end of **May 2020**.
 
-I have exposed some API endpoints for Doge Stock in order to run this website.
-While you are welcome to use the website,
-Other developers are also welcome to use this service but,
-Don't abuse it or take things too far or I'll start blocking your requests.
-Please take note that the webserver is intentionally placed away from the database, and queries may not be fulfilled at such a high rate.
-Serverside caching is enabled for some intensive methods,
-Your browser may also cache some requests for a period
+In addition, all other Doge Stock services relating to Chat Wars that are accessible from Telegram will be shut down at that time as well.
 
- - /spai/player/history?server&id
- - /spai/player/find?server&name
- - /spai/guild?server&tag
- - /spai/guild/members?server&tag
- - /spai/guild/all?server
- - /spai/player/all?server
- - /spai/player/count?server&filter
- - /spai/player/all/smart?server&startRow&fetchCount&filter&sortBy
- - /exchange/wtb?token&itemCode&server&quantity&price&exactPrice
+I may in the future chose to use the Doge Stock branding in other personal projects, however it's association with Chat Wars has reached it's conclusion.
 
-The \`server\` parameter expects that you specify "eucw" or "ru". Some aliases are accepted, but not guarunteed.
-Other fields depend on the circumstances, and I grant no guaruntee of it being successful.
+Thank you for supporting me in developing Doge Stock over the past two years.
 
-I also have websockets available running on /{server}/{queue} which mirror the queues available in the official Chat Wars API.
- - /eucw/deals
- - /eucw/offers
- - /eucw/duels
- - /eucw/sex_digest
- - /eucw/au_digest
- - /eucw/yellow_pages
- - /ru/deals
- - /ru/offers
- - /ru/duels
- - /ru/sex_digest
- - /ru/au_digest
- - /ru/yellow_pages
+Sincerely,
 
-If you are a regular user and would like to translate the site into your language,
-you are welcome to submit translations to my feedback or updates channel discussion group.
+🌑📦🍆⚒Anime Sex Storm (ASS) - "You only have OneShot, but I don't give OneShit"
 `;
 
 export default {
